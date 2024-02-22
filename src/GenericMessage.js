@@ -1,5 +1,6 @@
 const {roles, shiftroles} = require('./assign-roles.js');
 const addXpToUser = require('./db/utility.js');
+const levelUser = require('./db/levelling.js');
 
 const greetings = [
     "Hi", "Hello!", "How are you?", "Hi there!", "Hey :)", "Yo!", "Here I am", "What?",
@@ -14,6 +15,7 @@ const underDev = [
 ]
 
 
+const channelID = "1204375490492891156";
 
 
 module.exports = function(client) {
@@ -23,10 +25,25 @@ module.exports = function(client) {
     const guildId = msg.guild.id;
     const userId = msg.author.id;
 
+    if(!msg.author.bot){
+        const xpPerMsg = 5;
+        levelUser(userId, guildId, msg.member);
+        addXpToUser(guildId, userId, xpPerMsg);
+    }
+
+    if (msg.channel.id === channelID && msg.content.includes("https://")) {
+        const emojis = ["🎶", "🎵", "🎤"];
+        const randEmoji = Math.floor(Math.random() * emojis.length);
+        msg.react("💜");
+        msg.react(emojis[randEmoji]);
+    }
+
+
+
     if(caseInsensitiveContent.includes("corvado")){
         const rand = Math.floor(Math.random() * greetings.length);
         
-        const xpToAdd = 5;
+        const xpToAdd = 15;
 
         msg.reply(greetings[rand]);
         addXpToUser(guildId, userId, xpToAdd);
@@ -47,7 +64,7 @@ module.exports = function(client) {
     }
 
     /** Random switch  */
-    const x_xpToAdd = 5;
+    const x_xpToAdd = 10;
 
     switch(caseInsensitiveContent){
         case 'patty':

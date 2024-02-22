@@ -1,6 +1,7 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const {EmbedBuilder} = require('discord.js');
 
-const mongoClient = new MongoClient(process.env.MONGODB_URI, {
+const mdbclient = new MongoClient(process.env.MONGODB_URI, {
     serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
@@ -9,38 +10,72 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI, {
 });
 
 const levelRoles = {
-    5: "1142772431027699754",
+    5: "1208148998012010546",
     10: "1142774781586972684",
     15: "1142774872674676838",
     20: "1142774984217993266"
     // Add more level roles as needed
 };
 
-async function levelUser(userId, guildId, member) {
+module.exports = async function levelUser(userId, guildId, member) {
     try {
-        await mongoClient.connect();
-        const database = mongoClient.db(process.env.DB_NAME);
+        await mdbclient.connect();
+        const database = mdbclient.db(process.env.DB_NAME);
         const usersCollection = database.collection('users');
 
         // Find or create user in the database
         let user = await usersCollection.findOneAndUpdate(
             { userId: userId, guild: guildId },
-            { $setOnInsert: { userId: userId, exp: 0, level: 1 } },
+            { $setOnInsert: { 
+                userId: userId,
+                username: member.user.username,
+                discriminator: member.user.discriminator,
+                guild: guildId,
+                exp: 0,
+                level: 1,
+                warnings: 0, 
+            } },
             { upsert: true, returnDocument: 'after' }
         );
 
+        console.log(user.userId);
+
         // Check for level up
         const xpRequiredForUp = calculateXpToNextLevel(user.level);
+        console.log("current XP:"+ user.exp+" // XP required" + xpRequiredForUp + " // currentlvl" + user.level);
         
-        if (user.experience >= xpRequiredForUp) {
+        if (user.exp >= xpRequiredForUp) {
 
             // Calculate new level
-            const newLevel = Math.floor(user.experience / 1000) + 1;
+            const newLevel = Math.floor(user.exp / 1000) + 1;
 
-            // Update user's level
-            await usersCollection.updateOne({ userId: userId }, { $set: { level: newLevel } });
+            try {
+                await usersCollection.updateOne(
+                    { userId: userId, guild: guildId }, 
+                    { $set: { level: newLevel, exp: 0 } } // Resetting exp to 0 after leveling up
+                );
 
-            console.log(`${userId} has reached lvl ${newLevel}`);
+                console.log(`${userId} has reached lvl ${newLevel}`);
+
+
+            } catch(e) {
+                console.log(e);
+            }
+
+            // Get the default channel of the guild
+            const defaultChannel = member.guild.channels.cache.find(channel => channel.name === 'lounge');
+            // Send a message to the default channel
+            if (defaultChannel) {
+                const embed = new EmbedBuilder()
+                    .setTitle('⭐ Level Up')
+                    .setDescription(`${member.displayName} ha raggiunto il livello ${newLevel}! 🎉`)
+                    .setColor('#00ff00');
+                defaultChannel.send({embeds : [embed]});
+            } else {
+                console.log('Unable to find a suitable channel to send the message.');
+                console.log('Guild channels:');
+                console.log(member.guild.channels.cache.map(channel => `${channel.name} (${channel.type})`));
+            }
 
             // Check and assign new role
             if (levelRoles[newLevel]) {
@@ -60,12 +95,11 @@ async function levelUser(userId, guildId, member) {
                     await member.roles.remove(oldRole);
                 }
             }
+
         }
     } catch (error) {
         console.error('Error in levelUser:', error);
-    } finally {
-        await mongoClient.close();
-    }
+    } 
 }
 
 
@@ -74,4 +108,4 @@ function calculateXpToNextLevel(currentLevel) {
     return currentLevel * 1000;
 }
 
-module.exports = { levelUser };
+
