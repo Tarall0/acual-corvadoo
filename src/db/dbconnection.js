@@ -39,7 +39,10 @@ async function addMembersToDatabase(guild, client) {
             });
         });
 
-        console.log(`Members of ${guild.name} added to the database ✅`);
+        console.log("--------");
+        console.log(` GUILD `);
+        console.log("--------");
+        console.log(`Members of "${guild.name}" added to the database ✅`);
     } catch (err) {
         console.error('Error adding members to MongoDB:', err);
     }
@@ -53,10 +56,6 @@ module.exports = {
             // Connect to MongoDB
             await mdbclient.connect();
             console.log('Connected to MongoDB ✅');
-
-            // Ping MongoDB to confirm successful connection
-            await mdbclient.db("admin").command({ ping: 1 });
-            console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
             // Access the guilds the bot is in
             client.guilds.cache.forEach(async (guild) => {

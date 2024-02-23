@@ -1,7 +1,7 @@
 
 const axios = require('axios');
 
-async function getCryptoInfo(cryptoName) {
+exports.modules = async function getCryptoInfo(cryptoName) {
     try {
         const apiUrl = `https://api.coingecko.com/api/v3/coins/${cryptoName}`;
         const response = await axios.get(apiUrl);
@@ -46,4 +46,3 @@ async function getCryptoImg(cryptoName) {
 }
 
 
-exports.modules = {getCryptoImg, getCryptoInfo};

@@ -1,5 +1,6 @@
 const {canSpin, spinWheel} = require('./SpeenWheel.js');
 const {EmbedBuilder} = require('discord.js');
+const getCryptoInfo = require('./CryptoInfo.js');
 const axios = require('axios');
 
 module.exports = function(client){
@@ -20,7 +21,7 @@ module.exports = function(client){
                     spinWheel(i);
     
                 } else {
-                    i.reply("Sorry, you've reached the daily spin limit.");
+                    i.reply("Hai raggiunto il limite di spin disponibili al momento");
                 }
                 break;
             case 'profilename':
@@ -254,46 +255,5 @@ async function fetchRandomMeme() {
     } catch (error) {
         console.error('Error fetching meme:', error);
         return null;
-    }
-}
-
- async function getCryptoInfo(cryptoName) {
-    try {
-        const apiUrl = `https://api.coingecko.com/api/v3/coins/${cryptoName}`;
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-
-        const name = data.name;
-        const symbol = data.symbol;
-        const price = data.market_data.current_price.usd;
-        const priceChange = data.market_data.price_change_24h;
-        const priceChangePerc = data.market_data.price_change_percentage_24h;
-        const lastChange = data.market_data.last_updated;
-
-        return `
-**Name**: ${name}
-**Symbol**: ${symbol}
-**Price (USD)**: ${price}
-**Last 24h**: ${priceChange} (${priceChangePerc}%)
-**Updated**: ${lastChange}
-`;
-    } catch (error) {
-        console.error('Failed to retrieve cryptocurrency information:', error);
-        return 'Failed to retrieve cryptocurrency information';
-    }
-}
-
-async function getCryptoImg(cryptoName) {
-    try {
-        const apiUrl = `https://api.coingecko.com/api/v3/coins/${cryptoName}`;
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-
-        const img = data.image.small;
-
-        return img;
-    } catch (error) {
-        console.error('Failed to retrieve cryptocurrency image:', error);
-        return 'Failed to retrieve cryptocurrency image';
     }
 }

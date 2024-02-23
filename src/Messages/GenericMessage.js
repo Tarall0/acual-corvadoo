@@ -1,6 +1,6 @@
-const {roles, shiftroles} = require('./assign-roles.js');
-const addXpToUser = require('./db/utility.js');
-const levelUser = require('./db/levelling.js');
+const {roles, shiftroles} = require('../Commands/assign-roles.js');
+const addXpToUser = require('../db/utility.js');
+const levelUser = require('../db/levelling.js');
 
 const greetings = [
     "Hi", "Hello!", "How are you?", "Hi there!", "Hey :)", "Yo!", "Here I am", "What?",

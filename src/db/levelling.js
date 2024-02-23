@@ -11,7 +11,7 @@ const mdbclient = new MongoClient(process.env.MONGODB_URI, {
 
 const levelRoles = {
     5: "1208148998012010546",
-    10: "1142774781586972684",
+    10: "1210336013277335643",
     15: "1142774872674676838",
     20: "1142774984217993266"
     // Add more level roles as needed
@@ -104,7 +104,7 @@ module.exports = async function levelUser(userId, guildId, member) {
 
 
 function calculateXpToNextLevel(currentLevel) {
-    // Assuming a linear progression where each level requires 1000 more XP than the previous level
+    // Eventually implement a better progression currently assumes a linear progression counting 1000 xp more than pre.v level
     return currentLevel * 1000;
 }
 

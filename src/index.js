@@ -1,13 +1,9 @@
 const {Client, IntentsBitField, Partials, GatewayIntentBits} = require('discord.js');
-const handleGenericMessage = require('./GenericMessage.js');
-const moderation = require('./Moderation.js');
-const handleCommannds = require('./HandleCommands.js');
+const handleGenericMessage = require('./Messages/GenericMessage.js');
+const moderation = require('./Moderation/Moderation.js');
+const handleCommannds = require('./Commands/HandleCommands.js');
 const {run} = require('./db/dbconnection.js');
-const express = require('express');
-const app = express();
 require('dotenv').config();
-  
-const PORT = process.env.PORT || 3006;
 
 const client = new Client({
     intents:
@@ -45,14 +41,7 @@ handleGenericMessage(client);
 moderation(client);
 handleCommannds(client);
 
-app.get('/', (req, res) => {
-    res.send('Corvado Bot server is currently working!');
+
+client.login(process.env.TOKEN).then(() => {
+
 });
-  
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
-
-
-
-client.login(process.env.TOKEN);

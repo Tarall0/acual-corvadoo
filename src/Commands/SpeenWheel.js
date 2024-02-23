@@ -1,4 +1,4 @@
-const addXpToUser = require('./db/utility.js');
+const addXpToUser = require('../db/utility.js');
 
 const wheelRewards = {
     "You won a cute puppy! 🐕": 100,
@@ -18,20 +18,39 @@ const wheelcommandresponses = [
 ]
 
 
-// Map to store daily spin count for each user
-const dailySpinCounts = new Map();
+// Map to store spin counts and last spin time for each user
+const spinData = new Map();
 
 function canSpin(userId) {
-    const spinCount = dailySpinCounts.get(userId) || 0;
-    // Limit each user to 3 spins per day
+    const currentTime = new Date().getTime();
+    const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
+    const spinsPerHour = 1;
     const spinsPerDay = 3;
 
-    if (spinCount < spinsPerDay) {
-        dailySpinCounts.set(userId, spinCount + 1);
-        console.log(`${userId} - ${spinCount}`);
+    let userData = spinData.get(userId);
+
+    if (!userData) {
+        // If user data doesn't exist, initialize it
+        userData = { spinCount: 0, lastSpinTime: 0 };
+    }
+
+    // Check if it's been more than an hour since the last spin
+    if (currentTime - userData.lastSpinTime >= oneHour) {
+        // Reset spin count if it's a new hour
+        userData.spinCount = 0;
+    }
+
+    if (userData.spinCount < spinsPerHour && userData.spinCount < spinsPerDay) {
+        // If user has spins left within the hour and within the day, allow another spin
+        userData.spinCount++;
+        userData.lastSpinTime = currentTime;
+        spinData.set(userId, userData);
+        console.log(`${userId} - ${userData.spinCount}`);
         return true;
-    } 
-    return false;
+    } else {
+        // User has exceeded either the hourly or daily spin limit
+        return false;
+    }
 }
 
 function spinWheel(i) {
