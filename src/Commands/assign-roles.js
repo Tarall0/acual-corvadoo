@@ -1,4 +1,4 @@
-const {Client, IntentsBitField} = require('discord.js');
+const { Client, IntentsBitField } = require('discord.js');
 require('dotenv').config();
 
 const client = new Client({
@@ -21,7 +21,7 @@ const roles = [
     },
     {
         id: "1204741418619379722",
-        label: "Party Dancer  🎉",
+        label: "Party Dancer 🎉",
     },
     {
         id: "1204748313027420271",
@@ -31,8 +31,7 @@ const roles = [
         id: "1204747501459214407",
         label: "Tech Gnome 🚀",
     },
-
-]
+];
 
 const shiftroles = [
     {
@@ -43,9 +42,7 @@ const shiftroles = [
         id: "1204355135984242730",
         label: "Morning Saviour",
     }
-]
-
-
+];
 
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isButton()) return;
@@ -59,7 +56,6 @@ client.on('interactionCreate', async (interaction) => {
     try {
         const member = await guild.members.fetch(user.id);
         const roleToAdd = guild.roles.cache.get(selectedRole.id);
-        // ignore console.log( user.id, 'interacted with:', interaction.customId);
 
         if (member && roleToAdd) {
             if (member.roles.cache.has(roleToAdd.id)) {
@@ -78,9 +74,7 @@ client.on('interactionCreate', async (interaction) => {
     }
 });
 
-
-
 client.login(process.env.TOKEN);
 
-
-exports.modules = {roles, shiftroles}
+// Exporting roles and shiftroles arrays
+module.exports = { roles, shiftroles };

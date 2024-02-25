@@ -1,21 +1,16 @@
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, Embed } = require('discord.js');
+
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
 const addXpToUser = require('../db/utility.js');
 const levelUser = require('../db/levelling.js');
+const bestemmia = require('../UnCommands/bestemmia.js')
 
-const greetings = [
-    "Hi", "Hello!", "How are you?", "Hi there!", "Hey :)", "Yo!", "Here I am", "What?",
-];
-
-const underDev = [
-    "I am not currently developed for searches. You can ask Google for it.", 
-    "I am not able to do that", 
-    "Sorry, I am not implemented to do that", 
-    "I cannot currently do that. Ask the developer to add me that feature", 
-    "I am currently not able to proceed with your request"
-]
+const {greetings, underDev} = require('./Responses.js');
+const strike = require('../UnCommands/strike.js');
 
 
 const channelID = "1204375490492891156";
+const x_xpToAdd = 10;
 
 
 module.exports = function(client) {
@@ -63,10 +58,8 @@ module.exports = function(client) {
         underDevelopement(msg);
     }
 
-    /** Random switch  */
-    const x_xpToAdd = 10;
 
-    switch(caseInsensitiveContent){
+    switch (caseInsensitiveContent) {
         case 'patty':
             const rand = Math.floor(Math.random() * 2);
 
@@ -76,99 +69,77 @@ module.exports = function(client) {
                 msg.reply('salvatò');
                 msg.react("🌶️");
             }
-            
-            addXpToUser(guildId, userId, x_xpToAdd);
+
+            addXpToUser(msg.guild.id, msg.author.id, x_xpToAdd);
             break;
+
         case 'strike':
 
-            const srand = Math.floor(Math.random() * 3);
-
-            const gifUrls = ['https://tenor.com/view/thor-avenger-chris-hemsworth-mjolnir-gif-13624915'];
-
-            msg.reply('STRIKE ' + gifUrls[0]);
+            msg.reply(strike());
             msg.react("👊");
 
-            addXpToUser(guildId, userId, x_xpToAdd);
+            addXpToUser(msg.guild.id, msg.author.id, x_xpToAdd);
             break;
 
         case 'cucu':
             msg.reply("rucu");
             msg.react("🦚");
             msg.react("🦜");
-            addXpToUser(guildId, userId, x_xpToAdd);
+            addXpToUser(msg.guild.id, msg.author.id, x_xpToAdd);
             break;
+
         case 'signoraa':
             msg.reply("I limoniii");
-            msg.react("🍋")
-            addXpToUser(guildId, userId, x_xpToAdd);
+            msg.react("🍋");
+            addXpToUser(msg.guild.id, msg.author.id, x_xpToAdd);
             break;
     }
 
-    
 
     /** ! Commands (Unofficial commands available) */
 
     if (msg.content.startsWith('!assign-roles')) {
-        const components = roles.map(role => ({
-            type: 1,
-            components: [
-                {
-                    type: 2,
-                    style: 2,
-                    label: role.label,
-                    customId: role.label
-                }
-            ]
-        }));
+        const rolesx = roles;
+        const components = rolesx.map(role => {
+            const button = new ButtonBuilder()
+                .setCustomId(role.label)
+                .setLabel(role.label)
+                .setStyle(2);
+            return button;
+        });
     
-        msg.reply({ content: '**Lables**: choose the lable(s) that you want', components });
+        const row = new ActionRowBuilder().addComponents(components);
+    
+        const embed = new EmbedBuilder()
+            .setTitle('🪄 Selezione Ruoli del server')
+            .setDescription('Benvenut*! Qui puoi scegliere i ruoli che preferisci. Clicca sui pulsanti sotto per aggiungere o rimuovere i ruoli.')
+            .setColor('#4B0082');
+    
+        msg.channel.send({ embeds: [embed], components: [row] });
     }
     
     if (msg.content.startsWith('!shift-roles')) {
-        const components = shiftroles.map(srole => ({
-            type: 1,
-            components: [
-                {
-                    type: 2,
-                    style: 2,
-                    label: srole.label,
-                    customId: srole.label
-                }
-            ]
-        }));
+        const rolesy = shiftroles;
+        const components = rolesy.map(role => {
+            const button = new ButtonBuilder()
+                .setCustomId(role.label)
+                .setLabel(role.label)
+                .setStyle(2);
+            return button;
+        });
     
-        msg.reply({ content: '**Shifts**: choose the shift-hour you are currently doing', components });
+        const row = new ActionRowBuilder().addComponents(components);
+    
+        const embed = new EmbedBuilder()
+            .setTitle('⌛ Current Shift')
+            .setDescription('Nightly warrior or Morning saviour?')
+            .setColor('#4B0082');
+    
+        msg.channel.send({ embeds: [embed], components: [row] });
     }
 
     if(msg.content.startsWith("!bestemmia") && (msg.channel.id == '1204381121991934032')){
-        const dio = [
-            "Dio",
-            "Madonna",
-            "Maometto",
-            "Jehovah",
-            "iddio",
-            "dio",
-            "Allah",
-        ];
-        
-        const agg = [
-            "ladro",
-            "cane",
-            "ornitorinco",
-            "colorato",
-            "imbalsamato",
-            "nosferatu",
-            "incalanatore di insulti",
-            "inchiodato",
-            "vandalo",
-            "porco",
-            "Onlyfanser che manda i santini porno a tutti i santi del paradiso."
-        ]
-
-        const randio = dio[Math.floor(Math.random() * dio.length)];
-        const randagg = agg[Math.floor(Math.random() * agg.length)];
-
-        msg.reply(`${randio} ${randagg}`)
+        msg.reply(bestemmia());
     }
     
     

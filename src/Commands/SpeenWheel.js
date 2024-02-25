@@ -1,4 +1,6 @@
 const addXpToUser = require('../db/utility.js');
+const {wheelCommandResponses} = require('../Messages/Responses.js');
+
 
 const wheelRewards = {
     "You won a cute puppy! 🐕": 100,
@@ -10,12 +12,6 @@ const wheelRewards = {
     "Sorry, it's empty this time": 10,
     "You got a candy, its fruity 🍬": 20
 };
-
-const wheelcommandresponses = [
-    "Sure! :purple_heart:",
-    "*Just one moment :)*",
-    "*Here we go! :arrows_counterclockwise:*"
-]
 
 
 // Map to store spin counts and last spin time for each user
@@ -61,24 +57,26 @@ function spinWheel(i) {
     const guildId = i.guildId;
     const userId = i.user.id;
 
-    const rannr = Math.floor(Math.random() * wheelcommandresponses.length);
+    const rannr = Math.floor(Math.random() * wheelCommandResponses.length);
     //respond to the slash command
-    i.reply(wheelcommandresponses[rannr]);
+    i.reply(wheelCommandResponses[rannr]);
 
     addXpToUser(guildId, userId, xpWin);
 
     // Send reward message
-    i.channel.send(`**The wheel is spinning for ${i.member.displayName}... 🌀**`)
-    .then(() => {
-        setTimeout(() => {
-            i.channel.send(`**${selectedReward}**`)
-                .then(() => {
-                    setTimeout(() => {
-                        i.channel.send(`You just received ${xpWin} XP`);
-                    }, 500); 
-                });
-        }, 2000);
-    });
+    setTimeout(() => {
+        i.channel.send(`**La ruota gira per ${i.member.displayName}... 🌀**`)
+        .then(() => {
+            setTimeout(() => {
+                i.channel.send(`**${selectedReward}**`)
+                    .then(() => {
+                        setTimeout(() => {
+                            i.channel.send(`*Hai ricevuto ${xpWin} XP*`);
+                        }, 500); 
+                    });
+            }, 2000);
+        });
+    }, 1000)
  }
 
 

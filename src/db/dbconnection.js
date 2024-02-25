@@ -25,28 +25,36 @@ async function addMembersToDatabase(guild, client) {
         const guildMembers = await guild.members.fetch();
 
         // Iterate through all members of the guild
-        guildMembers.forEach(async (member) => {
-            // Insert member into the users collection
-            await usersCollection.insertOne({
-                userId: member.user.id,
-                username: member.user.username,
-                discriminator: member.user.discriminator,
-                guild: guild.id,
-                exp: 0,
-                level: 1,
-                warnings: 0,
-                // Add more fields as needed
-            });
-        });
+        for (const member of guildMembers.values()) {
+            // Check if the member already exists in the database
+            const existingUser = await usersCollection.findOne({ userId: member.user.id, guild: guild.id });
+
+            // If the user doesn't exist in the database, insert them
+            if (!existingUser) {
+                await usersCollection.insertOne({
+                    userId: member.user.id,
+                    username: member.user.username,
+                    discriminator: member.user.discriminator,
+                    guild: guild.id,
+                    exp: 0,
+                    level: 1,
+                    warnings: 0,
+                    // Add more fields as needed
+                });
+            }
+        }
+
 
         console.log("--------");
         console.log(` GUILD `);
         console.log("--------");
-        console.log(`Members of "${guild.name}" added to the database ✅`);
+        console.log(`Members of "${guild.name}" are in the database ✅`);
+
     } catch (err) {
         console.error('Error adding members to MongoDB:', err);
     }
 }
+
 
 
 // Exporting all the functions
