@@ -1,5 +1,6 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
+
 const mdbclient = new MongoClient(process.env.MONGODB_URI, {
     serverApi: {
         version: ServerApiVersion.v1,
@@ -8,9 +9,9 @@ const mdbclient = new MongoClient(process.env.MONGODB_URI, {
     }
 });
 
-module.exports = 
+module.exports = {
     // Function to add eperience points (XP) to a user in the MongoDB collection
-async function addXpToUser(guildId, userId, xp) {
+addXpToUser: async function addXpToUser(guildId, userId, xp) {
     try {
         // Connect to MongoDB
         await mdbclient.connect();
@@ -30,8 +31,65 @@ async function addXpToUser(guildId, userId, xp) {
         console.log(`Added ${xp} XP to user ${userId} in guild ${guildId}`);
     } catch (err) {
         console.error('Error updating user in MongoDB:', err);
-    } finally {
-        // Close the MongoDB connection
-        await mdbclient.close();
     }
+},
+
+getUserInfo: async function getUserInfo(guildId, userId){
+    try {
+        // Connect to MongoDB
+        await mdbclient.connect();
+
+        // Access the database
+        const database = mdbclient.db(process.env.DB_NAME);
+
+        // Access the users collection
+        const usersCollection = database.collection('users');
+
+        // Find the user information based on guildId and userId
+        const userInfo = await usersCollection.findOne({ guild: guildId, userId });
+
+        if (userInfo) {
+            console.log(`User Info for ${userInfo.username}#${userInfo.discriminator} (ID: ${userInfo.userId}) in guild ${userInfo.guild}:`);
+            console.log(`- Experience: ${userInfo.exp}`);
+            console.log(`- Level: ${userInfo.level}`);
+            console.log(`- Warnings: ${userInfo.warnings}`);
+            console.log(`- Guild Pokémon: ${userInfo.guildpokemon}`);
+        } else {
+            console.log(`User information not found for guild ${guildId} and user ${userId}`);
+        }
+
+        return userInfo; // Return the user information
+    } catch (err) {
+        console.error('Error retrieving user information from MongoDB:', err);
+        throw err; // Throw the error for handling in the caller
+    }
+},
+
+setPokemon: async function setPokemon(guildId, userId, pokemon){
+    try {
+        // Connect to MongoDB
+        await mdbclient.connect();
+
+        // Access the database
+        const database = mdbclient.db(process.env.DB_NAME);
+
+        // Access the users collection
+        const usersCollection = database.collection('users');
+
+        // Find the user information based on guildId and userId
+        const userInfo = await usersCollection.findOne({ guild: guildId, userId });
+
+        // Update user document based on userId and guildId
+        await usersCollection.updateOne(
+            { userId: userId, guild: guildId },
+            { $set: { guildpokemon: pokemon } } // Increment the 'exp' field by the provided 'xp' value
+        );
+        
+    } catch (err) {
+        console.error('Error adding Pokemon to user in db', err);
+        throw err; // Throw the error for handling in the caller
+    }
+}
+
+
 }

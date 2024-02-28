@@ -39,6 +39,7 @@ async function addMembersToDatabase(guild, client) {
                     exp: 0,
                     level: 1,
                     warnings: 0,
+                    guildpokemon: "none",
                     // Add more fields as needed
                 });
             }

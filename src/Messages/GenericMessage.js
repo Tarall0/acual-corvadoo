@@ -1,9 +1,10 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, Embed } = require('discord.js');
 
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
-const addXpToUser = require('../db/utility.js');
+const {addXpToUser, setPokemon} = require('../db/utility.js');
 const levelUser = require('../db/levelling.js');
 const bestemmia = require('../UnCommands/bestemmia.js')
+const getRandomPokemon = require('../Commands/pokemon.js')
 
 const {greetings, underDev} = require('./Responses.js');
 const strike = require('../UnCommands/strike.js');
@@ -95,8 +96,61 @@ module.exports = function(client) {
             break;
     }
 
+    /** const emojiName = 'snorlax';
+    const emoji = msg.guild.emojis.cache.find(emoji => emoji.name === emojiName);
+    if (emoji) {
+        console.log(`ID of ${emojiName}: ${emoji.id}`);
+    } else {
+        console.log(`Emoji "${emojiName}" not found in the server.`);
+    } */
+
+    
+
 
     /** ! Commands (Unofficial commands available) */
+
+    if (msg.content.startsWith('!pokemon')) {
+        const { pokemon, emoji } = getRandomPokemon(client);
+        if (emoji) {
+          
+            msg.channel.send(`${emoji}`);
+            msg.channel.send(`${pokemon}`);
+            msg.channel.send('`Vuoi catturare il pokemon?`').then((sentMessage) => {
+                // Add reactions for capturing and leaving the pokemon
+                sentMessage.react('✅'); // Check mark emoji for capture
+                sentMessage.react('❌'); // X emoji for leaving
+              
+                // Create a filter to only collect reactions from the message author
+                const filter = (reaction, user) => ['✅', '❌'].includes(reaction.emoji.name) && user.id === msg.author.id;
+              
+                // Collect reactions
+                sentMessage.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] })
+                .then(collected => {
+                    const reaction = collected.first();
+                    if (reaction.emoji.name === '✅') {
+                        // Capture the pokemon
+                        setPokemon(msg.guild.id, msg.author.id, pokemon);
+                        addXpToUser(msg.guild.id, msg.author.id, 50);
+                        msg.channel.send(`*${msg.author.username} ha catturato ${pokemon}!*`);
+                    } else if (reaction.emoji.name === '❌') {
+                        // Leave the pokemon
+                        msg.channel.send(`*${msg.author.username} ha deciso di non catturare ${pokemon}.*`);
+                        addXpToUser(msg.guild.id, msg.author.id, 20);
+                    }
+                })
+                .catch(collected => {
+                    msg.channel.send(`${pokemon} escaped rip`);
+                });
+            }).catch(err => {
+                console.error('Error sending Pokémon message:', err);
+            });
+        } else {
+            console.log("Error: Pokémon emoji not found.");
+            msg.channel.send("Error: Pokemon emoji not found.");
+        }
+    }
+    
+    
 
     if (msg.content.startsWith('!assign-roles')) {
         const rolesx = roles;

@@ -3,14 +3,14 @@ const {wheelCommandResponses} = require('../Messages/Responses.js');
 
 
 const wheelRewards = {
-    "You won a cute puppy! 🐕": 100,
-    "Congratulations, you get a free coffee! ☕": 50,
-    "You landed on a bag of gold coins! 💰": 200,
+    "You won a cute puppy! 🐕": 150,
+    "Congratulations, you get a free coffee! ☕": 100,
+    "You landed on a bag of gold coins! 💰": 250,
     "Oh no, better luck next time!": 10,
     "Whoops! Nothing this time.": 10,
     "Nope, that's a flop": 10,
     "Sorry, it's empty this time": 10,
-    "You got a candy, its fruity 🍬": 20
+    "You got a candy, its fruity 🍬": 50
 };
 
 
@@ -20,8 +20,8 @@ const spinData = new Map();
 function canSpin(userId) {
     const currentTime = new Date().getTime();
     const oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
-    const spinsPerHour = 1;
-    const spinsPerDay = 3;
+    const spinsPerHour = 2;
+    const spinsPerDay = 5;
 
     let userData = spinData.get(userId);
 

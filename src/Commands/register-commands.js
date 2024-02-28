@@ -61,16 +61,8 @@ const commands = [
 
     },
     {
-        name: 'profilename',
-        description: 'Edit the name displayed in this server',
-        options: [
-            {
-                name: 'usernick',
-                description: "The username you want to display for this server",
-                type: ApplicationCommandOptionType.String,
-                required: true,
-            }
-        ]
+        name: 'profileinfo',
+        description: 'Check user info in the server',
 
     },
     {

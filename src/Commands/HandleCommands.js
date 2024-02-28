@@ -1,4 +1,5 @@
 const {canSpin, spinWheel} = require('./SpeenWheel.js');
+const {addXpToUser, getUserInfo} = require('../db/utility.js');
 const {EmbedBuilder} = require('discord.js');
 const getCryptoInfo = require('./CryptoInfo.js');
 const axios = require('axios');
@@ -24,14 +25,27 @@ module.exports = function(client){
                     i.reply("Hai raggiunto il limite di spin disponibili al momento");
                 }
                 break;
-            case 'profilename':
-                const usernick = i.options.getString('usernick');
-                try {
-                    await i.member.setNickname(usernick);
-                    await i.reply(`Your profile name has been updated to: ${usernick}`);
-                } catch (error) {
-                    console.error('Failed to set nickname:', error);
-                    await i.reply('Failed to update your profile name. Please try again later.');
+            case 'profileinfo':
+                const userInfo = await getUserInfo(i.guild.id, i.member.id);
+
+                if (userInfo && userInfo.username) { // Check if userInfo is not null or undefined, and username is available
+                    // Create an embed to display user information
+                    const embed = new EmbedBuilder()
+                        .setTitle(`👤 User Info for ${userInfo.username}`)
+                        .setThumbnail(i.member.displayAvatarURL())
+                        .setColor('#4B0082')
+                        .addFields(
+                            { name: 'Guild Pokemon', value: `${userInfo.guildpokemon}` },
+                            //{ name: '\u200B', value: '\u200B' },
+                            { name: 'Experience', value: `${userInfo.exp}`, inline: true },
+                            { name: 'Level', value: `${userInfo.level}`, inline: true },
+                        )
+                        .setTimestamp()
+
+                    // Send the embed
+                    i.reply({ embeds: [embed] });
+                } else {
+                    i.reply('User information not found or incomplete.');
                 }
                 break;
             case 'randommeme':
@@ -225,6 +239,7 @@ module.exports = function(client){
                 .setTitle("About Title")
                 .setDescription("Description about Corvado Bot - Corvado is currently under developement")
                 .setColor('Random')
+
                 .addFields({
                     name: "Commands Available",
                     value: "\n - **/randommeme**\n- **/insult** {username} \n- **/poll** {question} {option 1} {emoji 1} {option 2} {emoji 2} - duration",
