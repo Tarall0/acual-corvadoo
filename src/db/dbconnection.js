@@ -31,6 +31,7 @@ async function addMembersToDatabase(guild, client) {
 
             // If the user doesn't exist in the database, insert them
             if (!existingUser) {
+                // If the user doesn't exist in the database, insert a new document
                 await usersCollection.insertOne({
                     userId: member.user.id,
                     username: member.user.username,
@@ -40,12 +41,14 @@ async function addMembersToDatabase(guild, client) {
                     level: 1,
                     warnings: 0,
                     guildpokemon: "none",
+                    gold: 0,
                     gandalf: false,
+                    objects: [] // Initialize the "objects" field as an empty array
                     // Add more fields as needed
                 });
             }
+            
         }
-
 
         console.log("--------");
         console.log(` GUILD `);
@@ -56,8 +59,6 @@ async function addMembersToDatabase(guild, client) {
         console.error('Error adding members to MongoDB:', err);
     }
 }
-
-
 
 // Exporting all the functions
 module.exports = {

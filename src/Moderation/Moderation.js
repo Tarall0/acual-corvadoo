@@ -1,6 +1,6 @@
 const bannedwords = ["Dio can", "diocan", "dio can", "porcodio", "dio cane", "diocane", "cristo infame", "porcoddio", "dio infame", "porvocdio", "porc@ di@", "porco dio"];
-const workwords = ["HR", "hr", "host", "dss", "R2", "NPS", "CLS", "detractor", "chromebox", "guest", "QA", "TL", "team leader", "TC", "Team coordinator", "OM","operation manager", "frattini", "phrattiny", "fratini", "vincent", "atrium", "debora", "deborah", "foundever", "sitel"]; 
-const whitewords = [""]; // to implement a word whitelisting system where certain words are allowed even if they match the banned word pattern to reduces false positive intervention
+const workwords = ["WF","adjustments","HR", "hr", "host", "dss", "R2", "NPS", "CLS", "detractor", "chromebox", "guest", "QA", "TL", "team leader", "TC", "Team coordinator", "OM","operation manager", "frattini", "phrattiny", "fratini", "vincent", "atrium", "debora", "deborah", "foundever", "sitel"]; 
+const whitewords = ["wtf"]; // to implement a word whitelisting system where certain words are allowed even if they match the banned word pattern to reduces false positive intervention
 
 const responses = [
     "Bro basta parlare di lavoro! 🎉",

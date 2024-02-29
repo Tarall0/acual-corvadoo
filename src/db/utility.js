@@ -82,14 +82,74 @@ setPokemon: async function setPokemon(guildId, userId, pokemon){
         // Update user document based on userId and guildId
         await usersCollection.updateOne(
             { userId: userId, guild: guildId },
-            { $set: { guildpokemon: pokemon } } // Increment the 'exp' field by the provided 'xp' value
+            { $set: { guildpokemon: pokemon } }
         );
         
     } catch (err) {
         console.error('Error adding Pokemon to user in db', err);
         throw err; // Throw the error for handling in the caller
     }
-}
+},
 
+setObject: async function setObject(guildId, userId, object){
+    try {
+        // Connect to MongoDB
+        await mdbclient.connect();
+
+        // Access the database
+        const database = mdbclient.db(process.env.DB_NAME);
+
+        // Access the users collection
+        const usersCollection = database.collection('users');
+
+        // Find the user information based on guildId and userId
+        const userInfo = await usersCollection.findOne({ guild: guildId, userId });
+
+        // Update user document based on userId and guildId
+        await usersCollection.updateOne(
+            { userId: userId, guild: guildId },
+            { $push: { objects: { $each: [object], $position: 0 } } } // Add object to the first position of the objects array
+        );
+        
+    } catch (err) {
+        console.error('Error adding object to user in db', err);
+        throw err; // Throw the error for handling in the caller
+    }
+},
+
+emptyUserInventory: async function emptyUserInventory(guildId, userId) {
+    try {
+        await mdbclient.connect();
+        const database = mdbclient.db(process.env.DB_NAME);
+        const usersCollection = database.collection('users');
+        
+        await usersCollection.updateOne(
+           { userId: userId, guild: guildId },
+           { $set: { objects: [] } }
+           
+        );
+
+        console.log(`Inventory emptied for user ${userId} in guild ${guildId}.`);
+    } catch (error) {
+        console.error('Error emptying inventory:', error);
+    }
+},
+
+addGuildCoin: async function addGuildCoin(guildId, userId){
+    try {
+        await mdbclient.connect();
+        const database = mdbclient.db(process.env.DB_NAME);
+        const usersCollection = database.collection('users');
+        
+        await usersCollection.updateOne(
+           { userId: userId, guild: guildId },
+           { $inc: { gold: + 1 } }
+        );
+
+        console.log(`1 Guild Coin added for user ${userId} in guild ${guildId}.`);
+    } catch (error) {
+        console.error('Error adding coin:', error);
+    }
+}
 
 }

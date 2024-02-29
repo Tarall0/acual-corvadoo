@@ -2,10 +2,11 @@ const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, AttachmentBuilder, Attach
 const nodeHtmlToImage = require('node-html-to-image')
 
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
-const {addXpToUser, setPokemon} = require('../db/utility.js');
+const {addXpToUser, setPokemon, setObject, addGuildCoin} = require('../db/utility.js');
 const levelUser = require('../db/levelling.js');
 const bestemmia = require('../UnCommands/bestemmia.js')
 const {getRandomPokemon} = require('../Commands/pokemon.js')
+const {discoverTreasure} = require('../Commands/guildfantasyobject.js')
 
 const {greetings, underDev} = require('./Responses.js');
 const strike = require('../UnCommands/strike.js');
@@ -97,7 +98,7 @@ module.exports = function(client) {
             break;
     }
 
-    const emojiName = 'pika';
+    const emojiName = '069';
     const emoji = msg.guild.emojis.cache.find(emoji => emoji.name === emojiName);
     if (emoji) {
         console.log(`ID of ${emojiName}: ${emoji.id}`);
@@ -109,79 +110,44 @@ module.exports = function(client) {
 
     //** TEST */
 
-    if(msg.content.startsWith('!htmltest')){
 
-            const name = 'Username';
-            const level = "1";
-            const experience = "444";
-            const pokemon = "Picazzo";
+    if (msg.content.startsWith("!updates")) {
+        // Check if the user is an admin or moderator
+        if (msg.member.permissions.has("ADMINISTRATOR") || msg.member.roles.cache.some(role => role.name === "Moderator")) {
+            // Extract the notification message from the command
+            const notificationMessage = msg.content.slice("!updates".length).trim();
+    
+            // Create the embed message
+            const embed = new EmbedBuilder()
+                .setColor('#4B0082')
+                .setTitle("📣 | Guild Updates")
+                .setDescription(notificationMessage)
+                .setTimestamp();
+    
+            // Send the embed message to the channel
+            msg.delete();
+            msg.channel.send({embeds: [embed]});
+        } else {
+            // If user is not an admin or moderator, send a message indicating permission denial
+            msg.channel.send("You don't have permission to use this command.");
+        }
+    }
 
+    if(msg.content.startsWith("!treasure")){
 
-            const _htmlTemplateProfile = `<!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-                <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-                <style>
-                body {
-                    font-family: "Roboto", monospace;
-                    background: rgb(22, 22, 22);
-                    color: #fff;
-                    max-width: 300px;
-                }
+        const treasure = discoverTreasure();
 
-                .profile-box {
-                    max-width: 300px;
-                    padding: 20px;
-                    display: flex;
-                    flex-direction: row;
-                    border-top: 3px solid rgb(153, 51, 255);
-                    background: rgb(31, 31, 31);
-                    align-items: center;
-                }
+        const treasureName = treasure.name;
+        const treasureEmoji = treasure.emoji;
+        const treasureDescription = treasure.description;
+        const treasureRarity = treasure.rarity;
+        
+        setObject(msg.guild.id, msg.author.id, treasureEmoji);
+        msg.channel.send(treasureEmoji);
 
-                .profile-img img{
-                    width: 50px;
-                    height: 50px;
-                    margin-right: 20px;
-                    border-radius: 50%;
-                    border: 1px solid #fff;
-                    padding: 5px;
-                }
-
-
-                </style>
-            </head>
-            <body>
-                <div class="profile-box">
-                    <div class="profile-img">
-                        <img src="${img}">
-                    </div>
-
-                <h4>Welcome ${name}</h4>
-                </div>
-            </body>
-            </html>
-            `
-
-            const images = await nodeHtmlToImage({
-                html: _htmlTemplateProfile,
-                quality: 100,
-                type: 'jpeg',
-                puppeteerArgs: {
-                args: ['--no-sandbox'],
-                },
-                encoding: 'buffer',
-            })
-            // for more configuration options refer to the library
-            console.log(images)
-
-            msg.channel.send({ files: [images] });
-           
-         }
-
-
+        // Do something with the treasure object, like sending it in a message
+        msg.channel.send(`Hai scoperto un nuovo tesoro: **${treasureName}**!\n Descrizione: ${treasureDescription}\nRarità: ${treasureRarity}`);
+    }
 
     /** ! Commands (Unofficial commands available) */
 
@@ -227,7 +193,10 @@ module.exports = function(client) {
         }
     }
     
-    
+    if(msg.content.startsWith('!gold')){
+        addGuildCoin(msg.guild.id, msg.author.id);
+        console.log("Gold");
+    }
 
     if (msg.content.startsWith('!assign-roles')) {
         const rolesx = roles;

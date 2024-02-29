@@ -66,6 +66,16 @@ const commands = [
 
     },
     {
+        name: 'inventory',
+        description: 'Check your inventory',
+
+    },
+    {
+        name: 'emptyinventory',
+        description: 'Remove all objects from your inventory',
+
+    },
+    {
         name: 'poll',
         description: 'Simple emoji powered poll',
         options: [

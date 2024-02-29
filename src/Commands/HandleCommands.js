@@ -1,5 +1,5 @@
 const {canSpin, spinWheel} = require('./SpeenWheel.js');
-const {addXpToUser, getUserInfo} = require('../db/utility.js');
+const {addXpToUser, getUserInfo, emptyUserInventory} = require('../db/utility.js');
 const nodeHtmlToImage = require('node-html-to-image')
 const {getPokemonDescription} = require('./pokemon.js');
 
@@ -28,6 +28,149 @@ module.exports = function(client){
                     i.reply("Hai raggiunto il limite di spin disponibili al momento");
                 }
                 break;
+            case 'emptyinventory':
+                emptyUserInventory(i.guild.id, i.member.id);
+                i.reply("Ho svuotato il tuo inventario")
+                break;
+            case 'inventory':
+
+                i.reply("Ecco il tuo inventario:");
+                const inventory = await getUserInfo(i.guild.id, i.member.id);
+                const objects = inventory.objects || []; // If objects is undefined, set it to an empty array
+                const obj1 = objects[0] ? objects[0] : " ";
+                const obj2 = objects[1] ? objects[1] : " ";
+                const obj3 = objects[2] ? objects[2] : " ";
+                const obj4 = objects[3] ? objects[3] : " ";
+                const obj5 = objects[4] ? objects[4] : " ";
+                const obj6 = objects[5] ? objects[5] : " ";
+                const gold = inventory.gold || 0
+                const _htmlTemplateInventory = `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+                        <style>
+                        body {
+                            font-family: "Roboto", monospace;
+                            background: rgb(22, 22, 22);
+                            color: #fff;
+                            max-width: 320px;
+                        }
+                    
+                        .profile {
+                            max-width: 320px;
+                            height: 100%;
+                            padding: 1em;
+                            background: rgb(31, 31, 31);
+                            position: relative;
+                        }
+                    
+                        .profile-box {
+                            display: flex; /* Change from grid to flex */
+                            flex-direction: column; /* Stack children vertically */
+                            align-items: center; /* Center align children horizontally */
+                            gap: 10px; /* Add some space between children */
+                        }
+
+                        .object-container{
+                            text-align: center;
+                            padding: 10px 20px;
+                            border: 2px solid rgb(153, 51, 255);
+                            border-radius: 5px;
+                            position: relative;
+                            margin: 1em auto;
+                        }
+
+                        .object-container h4{
+                            position: absolute;
+                            top: -40px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            font-size: 14px;
+                            color: rgb(153, 51, 255);
+
+                        }
+                        .object-box{
+                            display: grid;
+                            grid-template-columns: auto auto auto;
+                            gap: 5px;
+                        }
+
+                        .object-box div{
+                            width: 35px;
+                            height: 35px;
+                            border-radius: 5px;
+                            background: rgb(120, 120, 120, .3);
+                            display: grid;
+                            place-content: center;
+                            
+                        }
+
+                        .gold{
+                            position: absolute;
+                            top: 10px;
+                            right: 10px;
+
+                        }
+
+                    </style>
+                    
+
+                    </head>
+                    <body>
+                        <div class="profile">
+                            <div class="profile-box">
+                            <div class="gold">💎 ${gold}</div>
+    
+                                <div class="object-container">
+                                    <div class="object-box">
+                                        <h4>Objects</h4>
+                                        <div> 
+                                            ${obj1}
+                                        </div>
+                                        <div> 
+                                            ${obj2}
+                                        </div>
+                                        <div> 
+                                            ${obj3}
+                                        </div>
+                                        <div> 
+                                            ${obj4}
+                                        </div>
+                                        <div> 
+                                            ${obj5}
+                                        </div>
+                                        <div> 
+                                            ${obj6}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+        
+
+                        </div>
+                    </body>
+                    </html>
+                    `
+
+                    const inventoryImg = await nodeHtmlToImage({
+                        html: _htmlTemplateInventory,
+                        quality: 100,
+                        type: 'png',
+                        puppeteerArgs: {
+                        args: ['--no-sandbox'],
+                        },
+                        encoding: 'buffer',
+                    })
+                   
+                    
+                    i.channel.send({ files: [inventoryImg] }).then(
+                        i.channel.send("` Usa /emptyinventory per svuotare il tuo inventario `")
+                    );
+                    
+                break;
             case 'profileinfo':
                 const userInfo = await getUserInfo(i.guild.id, i.member.id);
 
@@ -36,8 +179,10 @@ module.exports = function(client){
                 const remainingExp = xp_currentLevel - userInfo.exp; // Remaining experience needed to reach the next level
                 const exp = ((xp_currentLevel - remainingExp) / xp_currentLevel) * 100;
                 const admin = userInfo.gandalf ? "Server Admin" : " ";
+               
 
-                i.reply("Ecco il tuo profilo");
+
+                i.reply("Ecco il tuo profilo:");
 
                 if (userInfo && userInfo.username) { // Check if userInfo is not null or undefined, and username is available
                     // Create an embed to display user information
@@ -74,7 +219,7 @@ module.exports = function(client){
                             max-width: 320px;
                             height: 100%;
                             padding: 1em;
-                            border-top: 3px solid rgb(153, 51, 255);
+                            border-top:4px solid rgb(153, 51, 255);
                             background: rgb(31, 31, 31);
                             position: relative;
                         }
@@ -124,8 +269,8 @@ module.exports = function(client){
                         }
                     
                         .profile-img img {
-                            width: 50px;
-                            height: 50px;
+                            width: 60px;
+                            height: 60px;
                             margin-right: 20px;
                             border-radius: 50%;
                             border: 2px solid rgb(153, 51, 255);
@@ -194,7 +339,7 @@ module.exports = function(client){
                                     <p class="title"> <b>Guild Pokemon</b>: <i>${userInfo.guildpokemon}</i></p>
                                     <p>${pokedesc}</p>
                                 </div>
-
+                                
                                 <div class="admin">
                                     ${admin}
                                 </div>
@@ -208,15 +353,13 @@ module.exports = function(client){
                     const images = await nodeHtmlToImage({
                         html: _htmlTemplateProfile,
                         quality: 100,
-                        type: 'jpeg',
+                        type: 'png',
                         puppeteerArgs: {
                         args: ['--no-sandbox'],
                         },
                         encoding: 'buffer',
                     })
-                    // for more configuration options refer to the library
-                    console.log(images)
-        
+                   
             
                     i.channel.send({ files: [images] });
                    
@@ -393,25 +536,7 @@ module.exports = function(client){
     
                 break;
             }
-                
-            case 'review':
-                const starsOption = i.options.get('stars');
-                const feedbackOption = i.options.get("feedback");
                         
-                console.log('Stars Option:', starsOption);
-                console.log('Feedback Option:', feedbackOption);
-                    
-                if (starsOption && feedbackOption) {
-                    const stars = starsOption.value;
-                    const comment = feedbackOption.value;
-                    console.log(`stars: ${stars} - feedback: ${comment}`);
-                    i.reply({ content: "Thank you for your feedback! ☺️", ephemeral: true });
-                 } else {
-                    console.error("Stars or feedback option is missing.");
-                    i.reply({ content: "Error processing your review. Please try again.", ephemeral: true });
-                }
-                break;
-                
             case 'about':
                 const about = new EmbedBuilder()
                 .setTitle("About Corvado BOT")
@@ -419,7 +544,7 @@ module.exports = function(client){
                 .setAuthor({ name: 'Corvado Bot', iconURL: 'https://i.imgur.com/Fr9lv6Y.png', url: 'https://tarallo.dev ' })
                 .setThumbnail('https://i.imgur.com/ODwYkai.png')
                 .setDescription("Description about Corvado BotCorvado Bot is a bot designed for discord servers. Developed in javascript using discord.js. \n Corvado Bot has implemented a tiered system, where the user gathers experience with interactions on the server. \n\n Corvado has implemented a moderation system, to make staying on the server enjoyable for everyone. *It is not currently possible to set this option, under development*. - Corvado is currently under developement")
-                .setColor('Random')
+                .setColor('#4B0082')
                 .setFooter({ text: 'Corvado Bot', iconURL: 'https://i.imgur.com/Fr9lv6Y.png' })
                 .addFields(
                     {
@@ -437,17 +562,18 @@ module.exports = function(client){
                 const commands = new EmbedBuilder()
                     .setTitle("Commands Corvado")
                     .setDescription("Here is the list of commands Corvado currently support")
+                    .setColor('#4B0082')
                     .setFooter({ text: 'Corvado Bot', iconURL: 'https://i.imgur.com/Fr9lv6Y.png' })
                     .addFields(
                         {
                             name: "Chat (!) Commands Available",
-                            value: "- **!pokemon**: *A random pokemon will spawn in the server, will you capture it?*\n\n",
+                            value: "- **!pokemon**: *A random pokemon will spawn in the server, will you capture it?* - Images from __*www.pokemon.com*__\n- **!treasure**: *Escavate a treasure to add to your inventory*\n",
                         }
                     )
                     .addFields(
                         {
                             name: "Slash (/) Commands Available",
-                            value: "- **/profileinfo**: *Show your server profile*\n- **/spinwheel**: Allow Corvado to unveil your destiny with a spin of the Wheel of Fortune\n- **/insult** {username}: Request Corvado to sprinkle a dash of playful banter upon someone special\n- **/poll** {question} {option 1} {emoji 1} {option 2} {emoji 2} - ? duration: *Ignite community engagement with an emoji-infused poll; pose a question and watch the responses flutter in*\n- **/cryptoinfo** {cryptoname}: *Returns crypto currency current stats from Coingecko API*\n- **/randommeme**: *Send a random meme from Heroky API*",
+                            value: "- **/profileinfo**: *Show your server profile*\n- **/inventory**: *Show your inventory*\n- **/emptyinventory**: *Remove all the objects from your inventory*\n- **/spinwheel**: Allow Corvado to unveil your destiny with a spin of the Wheel of Fortune\n- **/insult** {username}: Request Corvado to sprinkle a dash of playful banter upon someone special\n- **/poll** {question} {option 1} {emoji 1} {option 2} {emoji 2} - ? duration: *Ignite community engagement with an emoji-infused poll; pose a question and watch the responses flutter in*\n- **/cryptoinfo** {cryptoname}: *Returns crypto currency current stats from Coingecko API*\n- **/randommeme**: *Send a random meme from Heroku API*",
                         }
                         
                     );
