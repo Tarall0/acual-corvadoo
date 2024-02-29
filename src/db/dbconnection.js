@@ -40,6 +40,7 @@ async function addMembersToDatabase(guild, client) {
                     level: 1,
                     warnings: 0,
                     guildpokemon: "none",
+                    gandalf: false,
                     // Add more fields as needed
                 });
             }

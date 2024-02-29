@@ -1,5 +1,8 @@
 const {canSpin, spinWheel} = require('./SpeenWheel.js');
 const {addXpToUser, getUserInfo} = require('../db/utility.js');
+const nodeHtmlToImage = require('node-html-to-image')
+const {getPokemonDescription} = require('./pokemon.js');
+
 const {EmbedBuilder} = require('discord.js');
 const getCryptoInfo = require('./CryptoInfo.js');
 const axios = require('axios');
@@ -28,14 +31,22 @@ module.exports = function(client){
             case 'profileinfo':
                 const userInfo = await getUserInfo(i.guild.id, i.member.id);
 
+                const pokedesc = getPokemonDescription(userInfo.guildpokemon);
+                const xp_currentLevel = userInfo.level * 1000; //total experience required for the current level
+                const remainingExp = xp_currentLevel - userInfo.exp; // Remaining experience needed to reach the next level
+                const exp = ((xp_currentLevel - remainingExp) / xp_currentLevel) * 100;
+                const admin = userInfo.gandalf ? "Server Admin" : " ";
+
+                i.reply("Ecco il tuo profilo");
+
                 if (userInfo && userInfo.username) { // Check if userInfo is not null or undefined, and username is available
                     // Create an embed to display user information
-                    const embed = new EmbedBuilder()
-                        .setTitle(`👤 User Info for ${userInfo.username}`)
-                        .setThumbnail(i.member.displayAvatarURL())
+                    /**const embed = new EmbedBuilder()
+                        .setTitle(`Profile Information - ${userInfo.username}`)
+                        .setThumbnail(i.member.displayAvatarURL({size: 64}))
                         .setColor('#4B0082')
                         .addFields(
-                            { name: 'Guild Pokemon', value: `${userInfo.guildpokemon}` },
+                            { name: 'Guild Pokemon', value: `*${userInfo.guildpokemon}*` },
                             //{ name: '\u200B', value: '\u200B' },
                             { name: 'Experience', value: `${userInfo.exp}`, inline: true },
                             { name: 'Level', value: `${userInfo.level}`, inline: true },
@@ -43,7 +54,174 @@ module.exports = function(client){
                         .setTimestamp()
 
                     // Send the embed
-                    i.reply({ embeds: [embed] });
+                    i.reply({ embeds: [embed] }); */
+
+                    const _htmlTemplateProfile = `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8" />
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+                        <style>
+                        body {
+                            font-family: "Roboto", monospace;
+                            background: rgb(22, 22, 22);
+                            color: #fff;
+                            max-width: 320px;
+                        }
+                    
+                        .profile {
+                            max-width: 320px;
+                            height: 100%;
+                            padding: 1em;
+                            border-top: 3px solid rgb(153, 51, 255);
+                            background: rgb(31, 31, 31);
+                            position: relative;
+                        }
+                    
+                        .profile-box {
+                            display: flex; /* Change from grid to flex */
+                            flex-direction: column; /* Stack children vertically */
+                            align-items: center; /* Center align children horizontally */
+                            gap: 10px; /* Add some space between children */
+                        }
+                    
+                        .profile-user,
+                        .profile-experience {
+                            display: flex;
+                            flex-direction: row;
+                            align-items: center;
+                        }
+                    
+                        .profile-experience {
+                            position: relative;
+                            margin-top: -2em;
+                        }
+                    
+                        .profile-experience .exp {
+                            position: absolute;
+                            top: 23px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            font-size: 12px;
+                        }
+                    
+                        .box-experience {
+                            background: rgb(120, 120, 120, .3);
+                            width: 150px;
+                            text-align: center;
+                            padding: 3px;
+                            margin: 1em auto;
+                            height: 7px;
+                            border-radius: 5px;
+                        }
+                    
+                        .progress {
+                            width: ${exp}% !important;
+                            height: 100%;
+                            background-color: #4caf50;
+                            border-radius: 5px;
+                        }
+                    
+                        .profile-img img {
+                            width: 50px;
+                            height: 50px;
+                            margin-right: 20px;
+                            border-radius: 50%;
+                            border: 2px solid rgb(153, 51, 255);
+                            padding: 2px;
+                        }
+                    
+                        .profile-level {
+                            margin-top: -2.5em;
+                        }
+                    
+                        .pokemon {
+                            background: rgb(120, 120, 120, .3);
+                            padding: 10px 8px;
+                            border-radius: 5px;
+                            width: 250px; /* Increase width to accommodate content */
+                            margin: 1em auto;
+                            text-align: center; /* Center align content */
+                        }
+
+                        .pokemon .title{
+                            margin-top: -18px;
+                            text-shadow: 1px 1px black;
+                            font-size: 14px;
+                        }
+
+                        .pokemon p{
+                            font-size: 12px;
+                        }
+
+                        .admin{
+                            position: absolute;
+                            bottom: 10px;
+                            right: 10px;
+                            font-size: 12px;
+                            color: rgb(153, 51, 255);
+                        }
+
+                    </style>
+                    
+
+                    </head>
+                    <body>
+                        <div class="profile">
+                            <div class="profile-box">
+                                <div class="profile-user">
+                                    <div class="profile-img">
+                                        <img src="${i.member.displayAvatarURL()}">
+                                    </div>
+                
+                                    <h3>${userInfo.username}</h3>
+                                </div>
+                                <div class="profile-level">
+                                    <h5>LVL ${userInfo.level}</h5>
+                                </div>
+                                <div class="profile-experience">
+                                    <div class="box-experience">
+                                        <div class="progress">
+                                        </div>
+                                    </div>
+                                    <div class="exp">
+                                        ${userInfo.exp}
+                                    </div>
+                                </div>
+
+                                <div class="pokemon">
+                                    <p class="title"> <b>Guild Pokemon</b>: <i>${userInfo.guildpokemon}</i></p>
+                                    <p>${pokedesc}</p>
+                                </div>
+
+                                <div class="admin">
+                                    ${admin}
+                                </div>
+                            </div>
+
+                        </div>
+                    </body>
+                    </html>
+                    `
+        
+                    const images = await nodeHtmlToImage({
+                        html: _htmlTemplateProfile,
+                        quality: 100,
+                        type: 'jpeg',
+                        puppeteerArgs: {
+                        args: ['--no-sandbox'],
+                        },
+                        encoding: 'buffer',
+                    })
+                    // for more configuration options refer to the library
+                    console.log(images)
+        
+            
+                    i.channel.send({ files: [images] });
+                   
+                 
+
                 } else {
                     i.reply('User information not found or incomplete.');
                 }
@@ -236,21 +414,44 @@ module.exports = function(client){
                 
             case 'about':
                 const about = new EmbedBuilder()
-                .setTitle("About Title")
-                .setDescription("Description about Corvado Bot - Corvado is currently under developement")
+                .setTitle("About Corvado BOT")
+                .setURL('https://tarallo.dev/')
+                .setAuthor({ name: 'Corvado Bot', iconURL: 'https://i.imgur.com/Fr9lv6Y.png', url: 'https://tarallo.dev ' })
+                .setThumbnail('https://i.imgur.com/ODwYkai.png')
+                .setDescription("Description about Corvado BotCorvado Bot is a bot designed for discord servers. Developed in javascript using discord.js. \n Corvado Bot has implemented a tiered system, where the user gathers experience with interactions on the server. \n\n Corvado has implemented a moderation system, to make staying on the server enjoyable for everyone. *It is not currently possible to set this option, under development*. - Corvado is currently under developement")
                 .setColor('Random')
-
-                .addFields({
-                    name: "Commands Available",
-                    value: "\n - **/randommeme**\n- **/insult** {username} \n- **/poll** {question} {option 1} {emoji 1} {option 2} {emoji 2} - duration",
-                    inline: true
-                },
-                {
-                    name: "Descriptions",
-                    value: "\n- *Random meme fetched from API*\n- *Corvado will insult someone for you* \n- *Emoji based poll feature, add a question and emojis*",
-                    inline: true
-                });
+                .setFooter({ text: 'Corvado Bot', iconURL: 'https://i.imgur.com/Fr9lv6Y.png' })
+                .addFields(
+                    {
+                        name: "Commands Available",
+                        value: "\nUse **/corvado** for the list of commands available\n\n"
+                    
+                    },
+                )
+                
+                
                 i.reply({embeds: [about]});
+                break;
+
+            case 'corvado':
+                const commands = new EmbedBuilder()
+                    .setTitle("Commands Corvado")
+                    .setDescription("Here is the list of commands Corvado currently support")
+                    .setFooter({ text: 'Corvado Bot', iconURL: 'https://i.imgur.com/Fr9lv6Y.png' })
+                    .addFields(
+                        {
+                            name: "Chat (!) Commands Available",
+                            value: "- **!pokemon**: *A random pokemon will spawn in the server, will you capture it?*\n\n",
+                        }
+                    )
+                    .addFields(
+                        {
+                            name: "Slash (/) Commands Available",
+                            value: "- **/profileinfo**: *Show your server profile*\n- **/spinwheel**: Allow Corvado to unveil your destiny with a spin of the Wheel of Fortune\n- **/insult** {username}: Request Corvado to sprinkle a dash of playful banter upon someone special\n- **/poll** {question} {option 1} {emoji 1} {option 2} {emoji 2} - ? duration: *Ignite community engagement with an emoji-infused poll; pose a question and watch the responses flutter in*\n- **/cryptoinfo** {cryptoname}: *Returns crypto currency current stats from Coingecko API*\n- **/randommeme**: *Send a random meme from Heroky API*",
+                        }
+                        
+                    );
+                i.reply({embeds: [commands]});
                 break;
         }
     

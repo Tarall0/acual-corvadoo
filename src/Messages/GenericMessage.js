@@ -1,10 +1,11 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, Embed } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, AttachmentBuilder, Attachment } = require('discord.js');
+const nodeHtmlToImage = require('node-html-to-image')
 
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
 const {addXpToUser, setPokemon} = require('../db/utility.js');
 const levelUser = require('../db/levelling.js');
 const bestemmia = require('../UnCommands/bestemmia.js')
-const getRandomPokemon = require('../Commands/pokemon.js')
+const {getRandomPokemon} = require('../Commands/pokemon.js')
 
 const {greetings, underDev} = require('./Responses.js');
 const strike = require('../UnCommands/strike.js');
@@ -96,15 +97,90 @@ module.exports = function(client) {
             break;
     }
 
-    /** const emojiName = 'snorlax';
+    const emojiName = 'pika';
     const emoji = msg.guild.emojis.cache.find(emoji => emoji.name === emojiName);
     if (emoji) {
         console.log(`ID of ${emojiName}: ${emoji.id}`);
     } else {
         console.log(`Emoji "${emojiName}" not found in the server.`);
-    } */
+    }
 
     
+
+    //** TEST */
+
+    if(msg.content.startsWith('!htmltest')){
+
+            const name = 'Username';
+            const level = "1";
+            const experience = "444";
+            const pokemon = "Picazzo";
+
+
+            const _htmlTemplateProfile = `<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8" />
+                <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+                <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+                <style>
+                body {
+                    font-family: "Roboto", monospace;
+                    background: rgb(22, 22, 22);
+                    color: #fff;
+                    max-width: 300px;
+                }
+
+                .profile-box {
+                    max-width: 300px;
+                    padding: 20px;
+                    display: flex;
+                    flex-direction: row;
+                    border-top: 3px solid rgb(153, 51, 255);
+                    background: rgb(31, 31, 31);
+                    align-items: center;
+                }
+
+                .profile-img img{
+                    width: 50px;
+                    height: 50px;
+                    margin-right: 20px;
+                    border-radius: 50%;
+                    border: 1px solid #fff;
+                    padding: 5px;
+                }
+
+
+                </style>
+            </head>
+            <body>
+                <div class="profile-box">
+                    <div class="profile-img">
+                        <img src="${img}">
+                    </div>
+
+                <h4>Welcome ${name}</h4>
+                </div>
+            </body>
+            </html>
+            `
+
+            const images = await nodeHtmlToImage({
+                html: _htmlTemplateProfile,
+                quality: 100,
+                type: 'jpeg',
+                puppeteerArgs: {
+                args: ['--no-sandbox'],
+                },
+                encoding: 'buffer',
+            })
+            // for more configuration options refer to the library
+            console.log(images)
+
+            msg.channel.send({ files: [images] });
+           
+         }
+
 
 
     /** ! Commands (Unofficial commands available) */
@@ -114,8 +190,8 @@ module.exports = function(client) {
         if (emoji) {
           
             msg.channel.send(`${emoji}`);
-            msg.channel.send(`${pokemon}`);
-            msg.channel.send('`Vuoi catturare il pokemon?`').then((sentMessage) => {
+            msg.channel.send(`**${pokemon}**`);
+            msg.channel.send('` Vuoi catturare il pokemon? `').then((sentMessage) => {
                 // Add reactions for capturing and leaving the pokemon
                 sentMessage.react('✅'); // Check mark emoji for capture
                 sentMessage.react('❌'); // X emoji for leaving
@@ -124,7 +200,7 @@ module.exports = function(client) {
                 const filter = (reaction, user) => ['✅', '❌'].includes(reaction.emoji.name) && user.id === msg.author.id;
               
                 // Collect reactions
-                sentMessage.awaitReactions({ filter, max: 1, time: 60000, errors: ['time'] })
+                sentMessage.awaitReactions({ filter, max: 1, time: 30000, errors: ['time'] })
                 .then(collected => {
                     const reaction = collected.first();
                     if (reaction.emoji.name === '✅') {
@@ -136,10 +212,11 @@ module.exports = function(client) {
                         // Leave the pokemon
                         msg.channel.send(`*${msg.author.username} ha deciso di non catturare ${pokemon}.*`);
                         addXpToUser(msg.guild.id, msg.author.id, 20);
-                    }
+                    } 
+                    sentMessage.reactions.removeAll().catch(error => console.error('Failed to clear reactions:', error));
                 })
                 .catch(collected => {
-                    msg.channel.send(`${pokemon} escaped rip`);
+                    msg.channel.send(`*${pokemon} è fuggito*`);
                 });
             }).catch(err => {
                 console.error('Error sending Pokémon message:', err);
