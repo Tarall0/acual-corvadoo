@@ -1,11 +1,11 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, AttachmentBuilder, Attachment } = require('discord.js');
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const nodeHtmlToImage = require('node-html-to-image')
 
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
-const {addXpToUser, setPokemon, setObject, addGuildCoin} = require('../db/utility.js');
+const {addXpToUser, setPokemon, setObject, addGuildCoin, getUserInfo, addFightWin} = require('../db/utility.js');
 const levelUser = require('../db/levelling.js');
 const bestemmia = require('../UnCommands/bestemmia.js')
-const {getRandomPokemon} = require('../Commands/pokemon.js')
+const {getRandomPokemon, getPokemonEmoji, calculateDamage, calculateInitialStats, getPokemonDescription} = require('../Commands/pokemon.js')
 const {discoverTreasure} = require('../Commands/guildfantasyobject.js')
 
 const {greetings, underDev} = require('./Responses.js');
@@ -192,6 +192,113 @@ module.exports = function(client) {
             msg.channel.send("Error: Pokemon emoji not found.");
         }
     }
+
+    let fightCollector;
+
+if (msg.content.startsWith("!fight")) {
+    const user = await getUserInfo(msg.guild.id, msg.author.id);
+    const pokemon = user.guildpokemon;
+
+    const enemypokemon = getRandomPokemon(client);
+    let { health: enemyPokemonHealth, pokemonLevel: enemyPokemonLevel } = calculateInitialStats(enemypokemon.pokemon);
+    let {health: yourPokemonHealth} = calculateInitialStats(pokemon);
+    const emoji = getPokemonEmoji(enemypokemon.pokemon, client);
+
+    const startFight = (interaction) => {
+        // Simulate the fight
+        while (true) {
+            // Attack opponent
+            enemyPokemonHealth -= calculateDamage(pokemon);
+            // Check if enemy fainted
+            if (enemyPokemonHealth <= 0) {
+                winner = msg.author.username;
+                addFightWin(msg.guild.id, msg.author.id);
+                const xpWin = 80;
+                addXpToUser(msg.guild.id, msg.author.id, xpWin);
+                interaction.reply({ content: `Hai guadagnato ${xpWin} XP`, ephemeral: true });
+                announceWinner(winner);
+                break;
+            }
+    
+            // Enemy attacks back
+            yourPokemonHealth -= calculateDamage(enemypokemon.pokemon);
+            // Check if player's Pokemon fainted
+            if (yourPokemonHealth <= 0) {
+                winner = enemypokemon.pokemon;
+                const xpLose = 30;
+                addXpToUser(msg.guild.id, msg.author.id, xpLose);
+                interaction.reply({ content: `Hai guadagnato ${xpLose} XP`, ephemeral: true });
+                announceWinner(winner);
+                break;
+            }
+        }
+    };
+    
+    // Function to announce the winner
+    const announceWinner = (winner) => {
+        msg.channel.send(`Il vincitore è ${winner}!`);
+    };
+
+    const fightButton = new ButtonBuilder()
+        .setCustomId('fight')
+        .setLabel('Fight')
+        .setStyle(1);
+
+    const escapeButton = new ButtonBuilder()
+        .setCustomId('escape')
+        .setLabel('Escape')
+        .setStyle(2);
+
+    const buttonRow = new ActionRowBuilder()
+        .addComponents(fightButton, escapeButton);
+
+    const fightEmbed = new EmbedBuilder()
+        .setTitle(`${enemypokemon.pokemon} selvatico`)
+        .setColor('DarkRed')
+        .setDescription(`Punti Vita:  ${enemyPokemonHealth} | lvl ${enemyPokemonLevel}`)
+        .setThumbnail(emoji.url); // Set the emoji as thumbnail
+
+    msg.channel.send({ embeds: [fightEmbed], components: [buttonRow] })
+        .then(sentMessage => {
+            const filter = i => i.customId === 'fight' || i.customId === 'escape';
+            fightCollector = msg.channel.createMessageComponentCollector({
+                filter,
+                time: 10000,
+                dispose: true
+            });
+
+            fightCollector.on('collect', interaction => {
+                if (interaction.customId === 'fight') {
+                    startFight(interaction);
+                    // Stop the collector and remove buttons
+                    fightCollector.stop();
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                } else if (interaction.customId === 'escape') {
+                    // Handle escape logic
+                    const xpEscape = 10;
+                    // Handle escape logic
+                    interaction.reply({ content: `Hai guadagnato ${xpEscape} XP`, ephemeral: true });
+                    addXpToUser(msg.guild.id, msg.author.id, xpEscape);
+    
+                    msg.reply(`${msg.author.displayName} ha deciso di non combattere`);
+                    fightCollector.stop();
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                }
+            });
+
+            fightCollector.on('end', collected => {
+                if (collected.size === 0) {
+                    // If the collector ends due to timeout
+                    msg.reply(`${enemypokemon.pokemon} selvatico è fuggito`);
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                }
+            });
+        })
+        .catch(err => {
+            console.error('Error sending Pokémon message:', err);
+        });
+}
+
     
     if(msg.content.startsWith('!gold')){
         addGuildCoin(msg.guild.id, msg.author.id);

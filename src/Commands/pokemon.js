@@ -30,5 +30,33 @@ module.exports = {
         } else {
             return "Non hai ancora catturato un pokemon, digita !pokemon";
         }
+    },
+
+    getPokemonEmoji: function getPokemonEmoji(pokemonName, client){
+        const {emojiId} = pokemonEmojis[pokemonName];
+        const emoji = client.emojis.cache.get(emojiId);
+        return emoji;
+    },
+
+    // Function to calculate initial health points for a given pokemon and level
+    calculateInitialStats: function calculateInitialStats(pokemon) {
+        // to adjust mechanics as this is just for develeopement purposes 
+
+        const baseHealth = Math.floor(Math.random() * 50) + 50; // Base health points
+        const levelMultiplier = 5; // Multiplier for level
+        const pokemonLevel = Math.floor(Math.random() * 15) + 5; // base level
+
+        const health = baseHealth + (pokemonLevel * levelMultiplier)
+        return {health, pokemonLevel};
+    },
+
+    calculateDamage: function calculateDamage(pokemon) {
+        // also to adjust
+
+        const minDamage = 10;
+        const maxDamage = 30;
+    
+        // Calculate random damage within the range
+        return Math.floor(Math.random() * (maxDamage - minDamage + 1)) + minDamage;
     }
 }

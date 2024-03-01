@@ -42,11 +42,13 @@ async function addMembersToDatabase(guild, client) {
                     warnings: 0,
                     guildpokemon: "none",
                     gold: 0,
+                    f_wins: 0,
+                    wins: 0,
                     gandalf: false,
                     objects: [] // Initialize the "objects" field as an empty array
                     // Add more fields as needed
                 });
-            }
+            } 
             
         }
 

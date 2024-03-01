@@ -55,13 +55,12 @@ module.exports = function(client){
                             font-family: "Roboto", monospace;
                             background: rgb(22, 22, 22);
                             color: #fff;
-                            max-width: 320px;
+                            width: 280px;
                         }
                     
                         .profile {
-                            max-width: 320px;
-                            height: 100%;
-                            padding: 1em;
+                            max-width: 100%;
+                            padding: .5em;
                             background: rgb(31, 31, 31);
                             position: relative;
                         }
@@ -75,9 +74,9 @@ module.exports = function(client){
 
                         .object-container{
                             text-align: center;
-                            padding: 10px 20px;
+                            padding: 7px;
                             border: 2px solid rgb(153, 51, 255);
-                            border-radius: 5px;
+                            border-radius: 6px;
                             position: relative;
                             margin: 1em auto;
                         }
@@ -158,6 +157,7 @@ module.exports = function(client){
                     const inventoryImg = await nodeHtmlToImage({
                         html: _htmlTemplateInventory,
                         quality: 100,
+                        dpi: 600,
                         type: 'png',
                         puppeteerArgs: {
                         args: ['--no-sandbox'],
@@ -212,12 +212,12 @@ module.exports = function(client){
                             font-family: "Roboto", monospace;
                             background: rgb(22, 22, 22);
                             color: #fff;
-                            max-width: 320px;
+                            width: 320px;
+                            
                         }
                     
                         .profile {
-                            max-width: 320px;
-                            height: 100%;
+                            max-width: 100%;
                             padding: 1em;
                             border-top:4px solid rgb(153, 51, 255);
                             background: rgb(31, 31, 31);
@@ -228,7 +228,7 @@ module.exports = function(client){
                             display: flex; /* Change from grid to flex */
                             flex-direction: column; /* Stack children vertically */
                             align-items: center; /* Center align children horizontally */
-                            gap: 10px; /* Add some space between children */
+                            gap: 5px; /* Add some space between children */
                         }
                     
                         .profile-user,
@@ -240,7 +240,7 @@ module.exports = function(client){
                     
                         .profile-experience {
                             position: relative;
-                            margin-top: -2em;
+                            margin-top: -2.5em;
                         }
                     
                         .profile-experience .exp {
@@ -248,7 +248,7 @@ module.exports = function(client){
                             top: 23px;
                             left: 50%;
                             transform: translateX(-50%);
-                            font-size: 12px;
+                            font-size: 14px;
                         }
                     
                         .box-experience {
@@ -269,8 +269,8 @@ module.exports = function(client){
                         }
                     
                         .profile-img img {
-                            width: 60px;
-                            height: 60px;
+                            width: 50px;
+                            height: 50px;
                             margin-right: 20px;
                             border-radius: 50%;
                             border: 2px solid rgb(153, 51, 255);
@@ -278,15 +278,15 @@ module.exports = function(client){
                         }
                     
                         .profile-level {
-                            margin-top: -2.5em;
+                            margin-top: -2.75em;
                         }
                     
                         .pokemon {
                             background: rgb(120, 120, 120, .3);
-                            padding: 10px 8px;
+                            padding: 5px 4px;
                             border-radius: 5px;
                             width: 250px; /* Increase width to accommodate content */
-                            margin: 1em auto;
+                            margin: .5em auto;
                             text-align: center; /* Center align content */
                         }
 
@@ -297,7 +297,7 @@ module.exports = function(client){
                         }
 
                         .pokemon p{
-                            font-size: 12px;
+                            font-size: 10px;
                         }
 
                         .admin{
@@ -306,6 +306,14 @@ module.exports = function(client){
                             right: 10px;
                             font-size: 12px;
                             color: rgb(153, 51, 255);
+                        }
+
+                        .fights{
+                            position: absolute;
+                            top: 8px;
+                            right: 15px;
+                            font-size: 16px;
+                            border-bottom: 2px solid rgb(153, 51, 255);
                         }
 
                     </style>
@@ -317,7 +325,7 @@ module.exports = function(client){
                             <div class="profile-box">
                                 <div class="profile-user">
                                     <div class="profile-img">
-                                        <img src="${i.member.displayAvatarURL()}">
+                                        <img src="${i.member.displayAvatarURL({ format: 'jpg', size: 512 })}">
                                     </div>
                 
                                     <h3>${userInfo.username}</h3>
@@ -343,6 +351,9 @@ module.exports = function(client){
                                 <div class="admin">
                                     ${admin}
                                 </div>
+                                <div class="fights">
+                                    ⚔️ ${userInfo.f_wins}
+                                </div>
                             </div>
 
                         </div>
@@ -353,6 +364,9 @@ module.exports = function(client){
                     const images = await nodeHtmlToImage({
                         html: _htmlTemplateProfile,
                         quality: 100,
+                        dpi: 600,
+                        width: 100,
+                        height: 100,
                         type: 'png',
                         puppeteerArgs: {
                         args: ['--no-sandbox'],

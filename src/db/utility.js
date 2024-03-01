@@ -150,6 +150,23 @@ addGuildCoin: async function addGuildCoin(guildId, userId){
     } catch (error) {
         console.error('Error adding coin:', error);
     }
+},
+
+addFightWin: async function addFightWin(guildId, userId){
+    try {
+        await mdbclient.connect();
+        const database = mdbclient.db(process.env.DB_NAME);
+        const usersCollection = database.collection('users');
+        
+        await usersCollection.updateOne(
+           { userId: userId, guild: guildId },
+           { $inc: { f_wins: + 1 } }
+        );
+
+        console.log(`1 f_win registered for user ${userId} in guild ${guildId}.`);
+    } catch (error) {
+        console.error('Error registered f_win:', error);
+    }
 }
 
 }

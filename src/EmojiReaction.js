@@ -15,5 +15,6 @@ module.exports = function(client){
 
         // Add XP to the user
         addXpToUser(guildId, userId, xpWin);
+        
     });
 }
