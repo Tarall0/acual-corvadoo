@@ -133,21 +133,63 @@ module.exports = function(client) {
         }
     }
 
-    if(msg.content.startsWith("!treasure")){
-
-        const treasure = discoverTreasure();
-
-        const treasureName = treasure.name;
-        const treasureEmoji = treasure.emoji;
-        const treasureDescription = treasure.description;
-        const treasureRarity = treasure.rarity;
-        
-        setObject(msg.guild.id, msg.author.id, treasureEmoji);
-        msg.channel.send(treasureEmoji);
-
-        // Do something with the treasure object, like sending it in a message
-        msg.channel.send(`Hai scoperto un nuovo tesoro: **${treasureName}**!\n Descrizione: ${treasureDescription}\nRarità: ${treasureRarity}`);
+    if (msg.content.startsWith("!treasure")) {
+        try {
+            const treasure = discoverTreasure();
+    
+            const treasureName = treasure.name;
+            const treasureEmoji = treasure.emoji;
+            const treasureDescription = treasure.description;
+            const treasureRarity = treasure.rarity;
+    
+            // Construct embed
+            const embedTreasure = new EmbedBuilder()
+                .setTitle(`${msg.author.displayName} scopre un tesoro!`)
+                .setDescription(`**${treasureName}**\n*${treasureDescription}*\nRarity: **${treasureRarity}**`);
+            
+            // Set embed color and footer based on rarity
+            if (treasureRarity == 'Comune') {
+                embedTreasure.setColor('Grey');
+                embedTreasure.setFooter({ text: '⭐' });
+                addXpToUser(msg.guild.id, msg.author.id, 30);
+            } else if (treasureRarity == 'Raro') {
+                embedTreasure.setColor('Blue');
+                embedTreasure.setFooter({ text: '⭐⭐' });
+                addXpToUser(msg.guild.id, msg.author.id, 60);
+            } else if (treasureRarity == 'Epico') {
+                embedTreasure.setColor('Purple');
+                embedTreasure.setFooter({ text: '⭐⭐⭐' });
+                addXpToUser(msg.guild.id, msg.author.id, 120);
+            } else if (treasureRarity == 'Leggendario') {
+                embedTreasure.setColor('Gold');
+                embedTreasure.setFooter({ text: '⭐⭐⭐⭐' });
+                addXpToUser(msg.guild.id, msg.author.id, 250);
+            }
+    
+            
+            // Attempt to add object to user's inventory
+            setObject(msg.guild.id, msg.author.id, treasureEmoji)
+                .then(() => {
+                    console.log("Object added successfully to user's inventory");
+                    // Display treasure details
+                    msg.channel.send(treasureEmoji);
+                    // Send embed to channel
+                    msg.channel.send({ embeds: [embedTreasure] });
+                })
+                .catch((err) => {
+                    if (err.message === "User already has maximum number of objects.") {
+                        msg.channel.send("Il tuo inventario è pieno");
+                    } else {
+                        console.error(err);
+                        msg.channel.send("Errore durante il recupero del tesoro.");
+                    }
+                });
+        } catch (err) {
+            console.error(err);
+            msg.channel.send("Errore durante il recupero del tesoro.");
+        }
     }
+    
 
     /** ! Commands (Unofficial commands available) */
 
@@ -356,4 +398,9 @@ if (msg.content.startsWith("!fight")) {
 function underDevelopement(msg){
     const rand = Math.floor(Math.random() * underDev.length);
     msg.reply(underDev[rand]);
+}
+
+function emojiToUrl(emoji) {
+    const unicode = emoji.codePointAt(0).toString(16);
+    return `https://twemoji.maxcdn.com/v/latest/72x72/${unicode}.png`;
 }

@@ -92,29 +92,36 @@ setPokemon: async function setPokemon(guildId, userId, pokemon){
 },
 
 setObject: async function setObject(guildId, userId, object){
-    try {
-        // Connect to MongoDB
-        await mdbclient.connect();
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Connect to MongoDB
+            await mdbclient.connect();
 
-        // Access the database
-        const database = mdbclient.db(process.env.DB_NAME);
+            // Access the database
+            const database = mdbclient.db(process.env.DB_NAME);
 
-        // Access the users collection
-        const usersCollection = database.collection('users');
+            // Access the users collection
+            const usersCollection = database.collection('users');
 
-        // Find the user information based on guildId and userId
-        const userInfo = await usersCollection.findOne({ guild: guildId, userId });
+            // Find the user information based on guildId and userId
+            const userInfo = await usersCollection.findOne({ guild: guildId, userId });
 
-        // Update user document based on userId and guildId
-        await usersCollection.updateOne(
-            { userId: userId, guild: guildId },
-            { $push: { objects: { $each: [object], $position: 0 } } } // Add object to the first position of the objects array
-        );
-        
-    } catch (err) {
-        console.error('Error adding object to user in db', err);
-        throw err; // Throw the error for handling in the caller
-    }
+            // Check if user has less than 6 objects
+            if(userInfo.objects.length < 6) {
+                // Update user document based on userId and guildId if user has less than 6 objects 
+                await usersCollection.updateOne(
+                    { userId: userId, guild: guildId },
+                    { $push: { objects: { $each: [object], $position: 0 } } } // Add object to the first position of the objects array
+                );
+                resolve(); // Resolve the promise if the object is successfully added
+            } else {
+                reject(new Error("User already has maximum number of objects."));
+            }
+        } catch (err) {
+            console.error('Error adding object to user in db', err);
+            reject(err); // Reject the promise with the error for handling in the caller
+        }
+    });
 },
 
 emptyUserInventory: async function emptyUserInventory(guildId, userId) {

@@ -30,7 +30,7 @@ module.exports = function(client){
                 break;
             case 'emptyinventory':
                 emptyUserInventory(i.guild.id, i.member.id);
-                i.reply("Ho svuotato il tuo inventario")
+                i.reply({content:"Ho svuotato il tuo inventario", ephemeral: true})
                 break;
             case 'inventory':
 
@@ -581,13 +581,13 @@ module.exports = function(client){
                     .addFields(
                         {
                             name: "Chat (!) Commands Available",
-                            value: "- **!pokemon**: *A random pokemon will spawn in the server, will you capture it?* - Images from __*www.pokemon.com*__\n- **!treasure**: *Escavate a treasure to add to your inventory*\n",
+                            value: "- **!pokemon**: *A random pokemon will spawn in the server, will you capture it?* - Images from __*www.pokemon.com*__\n- **!fight**: *Simulate a fight with a wild pokemon*\n- **!treasure**: *Escavate a treasure to add to your inventory*\n",
                         }
                     )
                     .addFields(
                         {
                             name: "Slash (/) Commands Available",
-                            value: "- **/profileinfo**: *Show your server profile*\n- **/inventory**: *Show your inventory*\n- **/emptyinventory**: *Remove all the objects from your inventory*\n- **/spinwheel**: Allow Corvado to unveil your destiny with a spin of the Wheel of Fortune\n- **/insult** {username}: Request Corvado to sprinkle a dash of playful banter upon someone special\n- **/poll** {question} {option 1} {emoji 1} {option 2} {emoji 2} - ? duration: *Ignite community engagement with an emoji-infused poll; pose a question and watch the responses flutter in*\n- **/cryptoinfo** {cryptoname}: *Returns crypto currency current stats from Coingecko API*\n- **/randommeme**: *Send a random meme from Heroku API*",
+                            value: "- **/profileinfo**: *Show your server profile*\n- **/inventory**: *Show your inventory*\n- **/emptyinventory**: *Remove all the objects from your inventory*\n- **/spinwheel**: Allow Corvado to unveil your destiny with a spin of the Wheel of Fortune\n- **/insult** {username}: Request Corvado to sprinkle a dash of playful banter upon someone special\n- **/poll** {question} {option 1} {emoji 1} {option 2} {emoji 2} - ? duration: *Ignite community engagement with an emoji-infused poll; pose a question and watch the responses flutter in*\n- **/cryptoinfo** {cryptoname}: *Returns crypto currency current stats from Coingecko API*\n- **/randommeme**: *Send a random meme in the channel from random-meme API*",
                         }
                         
                     );

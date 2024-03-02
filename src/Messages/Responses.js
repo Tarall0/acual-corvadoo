@@ -17,7 +17,6 @@ const wheelCommandResponses = [
     "Solo un momento :)",
     "Ci siamo! :arrows_counterclockwise:",
     "Pronto per girare la ruota!",
-    "Eccoci qui! Aspettando il tuo comando.",
     "Preparati per l'avventura della ruota!",
     "Gira la ruota e vedi cosa succede!",
     "Forza! La fortuna ti aspetta!",

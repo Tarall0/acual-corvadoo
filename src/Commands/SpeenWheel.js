@@ -71,7 +71,7 @@ function spinWheel(i) {
                 i.channel.send(`**${selectedReward}**`)
                     .then(() => {
                         setTimeout(() => {
-                            i.channel.send(`*Hai ricevuto ${xpWin} XP*`);
+                            i.followUp({content:`*Hai ricevuto ${xpWin} XP*`, ephemeral: true});
                         }, 500); 
                     });
             }, 2000);
