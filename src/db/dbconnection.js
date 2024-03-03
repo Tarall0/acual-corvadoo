@@ -29,7 +29,7 @@ async function addMembersToDatabase(guild, client) {
             // Check if the member already exists in the database
             const existingUser = await usersCollection.findOne({ userId: member.user.id, guild: guild.id });
 
-            // If the user doesn't exist in the database, insert them
+            // If the user doesn't exist in the database, insert them in the collection
             if (!existingUser) {
                 // If the user doesn't exist in the database, insert a new document
                 await usersCollection.insertOne({
@@ -46,7 +46,7 @@ async function addMembersToDatabase(guild, client) {
                     wins: 0,
                     gandalf: false,
                     objects: [] // Initialize the "objects" field as an empty array
-                    // Add more fields as needed
+                    // Eventually to add more fields 
                 });
             } 
             
