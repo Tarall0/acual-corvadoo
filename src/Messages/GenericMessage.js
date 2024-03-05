@@ -2,11 +2,11 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const nodeHtmlToImage = require('node-html-to-image')
 
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
-const {addXpToUser, setPokemon, setObject, addGuildCoin, getUserInfo, addFightWin} = require('../db/utility.js');
+const {addXpToUser, setPokemon, setObject, addGuildCoin, getUserInfo, addFightWin, sellObject} = require('../db/utility.js');
 const levelUser = require('../db/levelling.js');
 const bestemmia = require('../UnCommands/bestemmia.js')
 const {getRandomPokemon, getPokemonEmoji, calculateDamage, calculateInitialStats, getPokemonDescription} = require('../Commands/pokemon.js')
-const {discoverTreasure} = require('../Commands/guildfantasyobject.js')
+const {discoverTreasure, getObjectInfo} = require('../Commands/guildfantasyobject.js')
 
 const {greetings, underDev} = require('./Responses.js');
 const strike = require('../UnCommands/strike.js');
@@ -109,6 +109,196 @@ module.exports = function(client) {
     
 
     //** TEST */
+
+    if (msg.content.startsWith("!merchant")) {
+        const merchants = {
+            "merchant1": {
+                name: "Mage Merchant", 
+                emojiId: "1214170388595216404", 
+                description: "Un misterioso mago in cerca di tesori",
+                paragraph: "*Sembra essere un potente mago alla ricerca di qualcosa in particolare*",
+                searches: [
+                    "Leggendario",
+                    "Epico",
+                ]
+            },
+        
+            "merchant2": {
+                name: "Monk Merchant", 
+                emojiId: "1214176424840400937", 
+                description: "Un monaco servitore del dio Hakiyah",
+                paragraph: "*Un individuo calmo e pacato, il dio Hakiyah è conosciuto come il dio dell'onestà*",
+                searches: [
+                    "Leggendario",
+                    "Epico",
+                    "Raro",
+                    "Comune"
+                ]
+            },
+        
+            "merchant3": {
+                name: "Crusader Merchant", 
+                emojiId: "1214348888081956917", 
+                description: "Un paladino devoto al dio Pelor",
+                paragraph: "*Un uomo alto e possente dotato di armatura. Il dio Pelor è la divinità della luce, del sole, della guarigione*",
+                searches: [
+                    "Epico",
+                    "Raro"
+                ]
+            }
+        };
+        
+    
+        const keys = Object.keys(merchants);
+        const randomKey = keys[Math.floor(Math.random() * keys.length)];
+        const merchant = merchants[randomKey];
+        const emoji = client.emojis.cache.get(merchant.emojiId);
+    
+        const merchantEmbed = new EmbedBuilder()
+            .setTitle(merchant.name)
+            .setDescription(merchant.description)
+            .setThumbnail(emoji.url);
+    
+        msg.reply({ content: "Vuoi interagire con il personaggio?", embeds: [merchantEmbed], components: [
+            new ActionRowBuilder().addComponents(
+                new ButtonBuilder().setCustomId('yes').setLabel('Yes').setStyle(1),
+                new ButtonBuilder().setCustomId('no').setLabel('No').setStyle(2)
+            )
+        ] }).then(sentMessage => {
+            const filter = interaction => interaction.user.id === msg.author.id;
+            const collector = msg.channel.createMessageComponentCollector({ filter, time: 30000 });
+    
+            collector.on('collect', interaction => {
+                if (interaction.customId === 'yes') {
+                    // If user clicks "Yes"
+                    interaction.reply({ content: `Hai deciso di interagire con ${merchant.name}`, ephemeral: true });
+                    sentMessage.edit({ components: [] }).catch(console.error);
+
+                    const actionEmbed = new EmbedBuilder()
+                        .setTitle("Quale oggetto vuoi offrire al mercante?")
+                        .setDescription("Usa **!sell** *{posizione}* (da 1 a 6) per mostrare l'oggetto al mercante. Se non ricordi la posizione dei tuoi oggetti, usa **/inventory**");
+                    
+                    msg.channel.send({embeds: [actionEmbed]});
+                
+                    collector.stop(); // Stop the collector to prevent further interactions
+                
+                    const filter = (response) => {
+                        return response.author.id === msg.author.id && response.content.startsWith("!sell");
+                    };
+                
+                    msg.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ['time'] })
+                        .then(async collected => {
+                            const sellCommand = collected.first().content;
+                            // Perform the sell logic based on the sellCommand
+                            const user = await getUserInfo(msg.guild.id, msg.author.id);
+                            const objects = user.objects; // objects is an array
+                        
+                            // Extract the position from the sellCommand
+                            const sellPosition = sellCommand.split(" ")[1]; // Assuming the command is like "!sell {position}"
+                            const position = parseInt(sellPosition);
+                
+                            
+                            if (!isNaN(position) && position >= 1 && position <= objects.length) {
+                                const objectToSell = objects[position - 1]; // Arrays are 0-indexed
+                                const objectInfo = getObjectInfo(objectToSell);
+                                // Perform the logic to sell objectToSell
+                                msg.channel.send(`*Quindi hai deciso di offrire ${objectToSell} a **${merchant.name}** *`);
+
+                                const merchantEmbedSelling = new EmbedBuilder()
+                                    .setTitle(merchant.name)
+                                    
+                                    .setThumbnail(emoji.url);
+
+                                if (objectInfo.rarity && merchant.searches.includes(objectInfo.rarity)) {
+                                    msg.channel.send(`Questo oggetto ${objectToSell} **${objectInfo.name}** interessa a **${merchant.name}**`);
+                        
+
+                                    merchantEmbedSelling.setDescription(`Per ${objectToSell} **${objectInfo.name}** riceverai **${objectInfo.price} 💎 diamanti**\n *Se accetti lo scambio, non potrai annullarlo.*`);
+
+                                    msg.channel.send({embeds: [merchantEmbedSelling], components: [
+                                        new ActionRowBuilder().addComponents(
+                                            new ButtonBuilder().setCustomId('sell').setLabel('Vendi').setStyle(3),
+                                            new ButtonBuilder().setCustomId('cancel').setLabel('Annulla').setStyle(4)
+                                        )
+                                    ]}).then(sentMsgToSell => {
+                                        const filter = interaction => interaction.user.id === msg.author.id;
+                                        const collector = msg.channel.createMessageComponentCollector({ filter, time: 30000 });
+
+                                        collector.on('collect', interaction => {
+                                            if(interaction.customId == "sell"){
+                                                interaction.reply(`${interaction.member.displayName} ha venduto  ${objectToSell} **${objectInfo.name}** al personaggio **${merchant.name}**`)
+                                                sentMsgToSell.edit({ components: [] }).catch(console.error);
+                                                sellObject(interaction.guild.id, interaction.member.id, objectToSell, objectInfo.price);
+                                                addXpToUser(interaction.guild.id, interaction.member.id, 20);
+                                                collector.stop();
+                                                
+                                            } else{
+                                                interaction.reply(`${interaction.member.displayName} non ha concluso la trattativa per  ${objectToSell} **${objectInfo.name}** con **${merchant.name}**`)
+                                                sentMsgToSell.edit({ components: [] }).catch(console.error);
+                                                collector.stop();
+                                            }
+                                        })
+                                    })
+                                } else {
+                                    msg.channel.send(`Questo oggetto ${objectToSell} **${objectInfo.name}** non sembra interessare a **${merchant.name}**`);
+                        
+
+                                    merchantEmbedSelling.setDescription(`Per ${objectToSell} **${objectInfo.name}** posso offrirti ** 2 💎 diamanti**\n *Se accetti lo scambio, non potrai annullarlo.*`);
+
+                                    msg.channel.send({embeds: [merchantEmbedSelling], components: [
+                                        new ActionRowBuilder().addComponents(
+                                            new ButtonBuilder().setCustomId('sell').setLabel('Vendi').setStyle(3),
+                                            new ButtonBuilder().setCustomId('cancel').setLabel('Annulla').setStyle(4)
+                                        )
+                                    ]}).then(sentMsgToSell => {
+                                        const filter = interaction => interaction.user.id === msg.author.id;
+                                        const collector = msg.channel.createMessageComponentCollector({ filter, time: 30000 });
+
+                                        collector.on('collect', interaction => {
+                                            if(interaction.customId == "sell"){
+                                                interaction.reply(`${interaction.member.displayName} ha venduto  ${objectToSell} **${objectInfo.name}** al personaggio **${merchant.name}**`)
+                                                sentMsgToSell.edit({ components: [] }).catch(console.error);
+                                                sellObject(interaction.guild.id, interaction.member.id, objectToSell, objectInfo.price);
+                                                addXpToUser(interaction.guild.id, interaction.member.id, 20);
+                                                collector.stop();
+                                                
+                                            } else{
+                                                interaction.reply(`${interaction.member.displayName} non ha concluso la trattativa per  ${objectToSell} **${objectInfo.name}** con **${merchant.name}**`)
+                                                sentMsgToSell.edit({ components: [] }).catch(console.error);
+                                                collector.stop();
+                                            }
+                                        })
+                                    })
+                                    
+                                }
+                                
+                            } else {
+                                msg.channel.send("Posizione non valida. L'interazione è stata annullata.");
+                            }
+                        })
+                        .catch(() => {
+                            msg.channel.send("Nessuna risposta rilevata. L'interazione è stata annullata.");
+                        });
+                    
+                } else if (interaction.customId === 'no') {
+                    // If user clicks "No"
+                    interaction.reply({ content: 'Hai deciso di non interagire con il personaggio"', ephemeral: true });
+                    // Remove the buttons and stop the collector
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                    collector.stop();
+                }
+                
+            });
+    
+            collector.on('end', collected => {
+                // If the collector ends without any interaction
+                if (collected.size === 0) {
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                }
+            });
+        }).catch(console.error);
+    }
+    
 
 
     if (msg.content.startsWith("!updates")) {

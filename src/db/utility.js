@@ -124,6 +124,29 @@ setObject: async function setObject(guildId, userId, object){
     });
 },
 
+sellObject: async function sellObject(guildId, userId, obj, gold){
+
+    try {
+        await mdbclient.connect();
+        const database = mdbclient.db(process.env.DB_NAME);
+        const usersCollection = database.collection('users');
+        
+        await usersCollection.updateOne(
+           { userId: userId, guild: guildId },
+           { 
+            $pull: { objects: obj }, // Remove the object from the objects array
+            $inc: { gold: gold } // Increment the gold field with the new gold amount
+            }
+           
+        );
+
+        console.log(`Object "${obj}" sold by user ${userId} in guild ${guildId}.`);
+    } catch (error) {
+        console.error('Error selling object:', error);
+    }
+
+},
+
 emptyUserInventory: async function emptyUserInventory(guildId, userId) {
     try {
         await mdbclient.connect();
