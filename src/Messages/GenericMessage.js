@@ -6,7 +6,7 @@ const {addXpToUser, setPokemon, setObject, addGuildCoin, getUserInfo, addFightWi
 const levelUser = require('../db/levelling.js');
 const bestemmia = require('../UnCommands/bestemmia.js')
 const {getRandomPokemon, getPokemonEmoji, calculateDamage, calculateInitialStats, getPokemonDescription} = require('../Commands/pokemon.js')
-const {discoverTreasure} = require('../Commands/guildfantasyobject.js')
+const {discoverTreasure, getObjectInfo} = require('../Commands/guildfantasyobject.js')
 
 const {greetings, underDev} = require('./Responses.js');
 const strike = require('../UnCommands/strike.js');
@@ -98,7 +98,7 @@ module.exports = function(client) {
             break;
     }
 
-    const emojiName = '069';
+    const emojiName = 'crusader';
     const emoji = msg.guild.emojis.cache.find(emoji => emoji.name === emojiName);
     if (emoji) {
         console.log(`ID of ${emojiName}: ${emoji.id}`);
@@ -110,6 +110,124 @@ module.exports = function(client) {
 
     //** TEST */
 
+    if (msg.content.startsWith("!merchant")) {
+        const merchants = {
+            "merchant1": {
+                name: "Mage Merchant", 
+                emojiId: "1214170388595216404", 
+                description: "Un misterioso mago in cerca di tesori",
+                paragraph: "*Sembra essere un potente mago alla ricerca di qualcosa in particolare*",
+                searches: [
+                    "Leggendario",
+                    "Epico",
+                ]
+            },
+        
+            "merchant2": {
+                name: "Monk Merchant", 
+                emojiId: "1214176424840400937", 
+                description: "Un monaco servitore del dio Hakiyah",
+                paragraph: "*Un individuo calmo e pacato, il dio Hakiyah è conosciuto come il dio dell'onestà*",
+                searches: [
+                    // None
+                ]
+            },
+        
+            "merchant3": {
+                name: "Crusader Merchant", 
+                emojiId: "1214348888081956917", 
+                description: "Un paladino devoto al dio Pelor",
+                paragraph: "*Un uomo alto e possente dotato di armatura. Il dio Pelor è la divinità della luce, del sole, della guarigione*",
+                searches: [
+                    "Epico"
+                ]
+            }
+        };
+        
+    
+        const keys = Object.keys(merchants);
+        const randomKey = keys[Math.floor(Math.random() * keys.length)]; // Get a random key of the array merchants 
+        const merchant = merchants[randomKey]; // Get the merchant object using the random key
+    
+        const emoji = client.emojis.cache.get(merchant.emojiId);
+    
+        const merchantEmbed = new EmbedBuilder()
+            .setTitle(merchant.name)
+            .setDescription(merchant.description + "\n\n" + merchant.paragraph)
+            .setThumbnail(emoji.url); // Using emojiId directly
+    
+        msg.reply({ content: "Vuoi interagire con il personaggio?", embeds: [merchantEmbed], components: [
+            new ActionRowBuilder().addComponents(
+                new ButtonBuilder().setCustomId('yes').setLabel('Yes').setStyle(1),
+                new ButtonBuilder().setCustomId('no').setLabel('No').setStyle(2)
+            )
+        ] }).then(sentMessage => {
+            const filter = interaction => interaction.user.id === msg.author.id;
+            const collector = msg.channel.createMessageComponentCollector({ filter, time: 30000 });
+
+            collector.on('collect', interaction => {
+                if (interaction.customId === 'yes') {
+                    // If user clicks "Yes"
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                    msg.channel.send("Quale oggetto vuoi offrire al mercante?");
+                    msg.channel.send("Usa **!sell** *{posizione}* (da 1 a 6) per mostrare l'oggetto al mercante");
+
+                    collector.stop();
+
+                    const filter = (response) => {
+                        return response.author.id === msg.author.id && response.content.startsWith("!sell");
+                    };
+
+
+                    msg.channel.awaitMessages({ filter, max: 1, time: 60000, errors: ['time'] })
+                    .then(async collected => {
+                        const sellCommand = collected.first().content;
+                        const parts = sellCommand.split(' '); // Split the command into parts to extract the position of the object to sell
+                        if (parts.length === 2 && parts[0] === '!sell') {
+                            const position = parseInt(parts[1]); // Extract the position from the command
+                            if (!isNaN(position) && position >= 1 && position <= 6) {
+                               
+                                const {objects: objects} = await getUserInfo(msg.guild.id, msg.author.id);
+
+                                const treasure = getObjectInfo(objects[position]);
+                             
+                                msg.channel.send("Hai selezionato la posizione *"+position+"* che contiene **"+objects[position]+" "+treasure.name+"**");
+
+                                // to finish here as it has not been implemented anything here 
+                            } else {
+                                msg.channel.send("Posizione non valida. Please provide a number between 1 and 6.");
+                            }
+                        } else {
+                            msg.channel.send("Invalid sell command. Please use the format `!sell {position}`.");
+                        }
+                    })
+                    .catch(() => {
+                        msg.channel.send("No response detected. The interaction has been cancelled.");
+                    });
+                    
+                    
+
+                    // Perform some action here
+                } else if (interaction.customId === 'no') {
+                    // If user clicks "No"
+                    interaction.reply({ content: 'You clicked "No"', ephemeral: true });
+                    // Remove the buttons and stop the collector
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                    collector.stop();
+                }
+            });
+
+            collector.on('end', collected => {
+                // If the collector ends without any interaction
+                if (collected.size === 0) {
+                    msg.channel.send(`***${msg.author.displayName}** ha impiegato troppo tempo e **${merchant.name}** ha deciso di andare via*`)
+                    sentMessage.edit({ components: [] }).catch(console.error);
+                }
+            });
+        }).catch(console.error);
+    }
+    
+    
 
     if (msg.content.startsWith("!updates")) {
         // Check if the user is an admin or moderator

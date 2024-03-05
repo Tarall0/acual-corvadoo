@@ -1,4 +1,4 @@
-const {addXpToUser} = require('./db/utility.js');
+const {addXpToUser} = require('../db/utility.js');
 
 module.exports = function(client){
 

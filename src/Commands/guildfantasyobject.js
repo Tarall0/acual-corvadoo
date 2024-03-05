@@ -47,5 +47,22 @@ module.exports = {
                 };
             }
         }
+    }, 
+
+    getObjectInfo: function getObjectInfo(treasureEmoji){
+        for (const [name, obj] of Object.entries(objects)) {
+            // Check if the provided emoji matches the object's emoji
+            if (obj.emoji === treasureEmoji) {
+                // Return the treasure information
+                return {
+                    name: name,
+                    emoji: obj.emoji,
+                    description: obj.description,
+                    rarity: obj.rarity
+                };
+            }
+        }
+        // If no match found, return null or handle accordingly
+        return null;
     }
 };

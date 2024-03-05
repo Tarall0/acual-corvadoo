@@ -2,7 +2,7 @@ const {Client, IntentsBitField, Partials, GatewayIntentBits} = require('discord.
 const handleGenericMessage = require('./Messages/GenericMessage.js');
 const moderation = require('./Moderation/Moderation.js');
 const handleCommannds = require('./Commands/HandleCommands.js');
-const emojiReaction = require('./EmojiReaction.js')
+const emojiReaction = require('./Messages/EmojiReaction.js')
 const {run} = require('./db/dbconnection.js');
 require('dotenv').config();
 

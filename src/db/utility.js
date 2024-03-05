@@ -1,13 +1,5 @@
 const { MongoClient, ServerApiVersion } = require('mongodb');
-
-
-const mdbclient = new MongoClient(process.env.MONGODB_URI, {
-    serverApi: {
-        version: ServerApiVersion.v1,
-        strict: true,
-        deprecationErrors: true,
-    }
-});
+const {mdbclient} = require('./dbconnection')
 
 module.exports = {
     // Function to add eperience points (XP) to a user in the MongoDB collection
@@ -50,10 +42,6 @@ getUserInfo: async function getUserInfo(guildId, userId){
 
         if (userInfo) {
             console.log(`User Info for ${userInfo.username}#${userInfo.discriminator} (ID: ${userInfo.userId}) in guild ${userInfo.guild}:`);
-            console.log(`- Experience: ${userInfo.exp}`);
-            console.log(`- Level: ${userInfo.level}`);
-            console.log(`- Warnings: ${userInfo.warnings}`);
-            console.log(`- Guild Pokémon: ${userInfo.guildpokemon}`);
         } else {
             console.log(`User information not found for guild ${guildId} and user ${userId}`);
         }
