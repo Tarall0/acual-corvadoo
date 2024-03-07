@@ -3,10 +3,6 @@ const nodeHtmlToImage = require('node-html-to-image')
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
 const {addXpToUser, setPokemon, setObject, addGuildCoin, getUserInfo, addFightWin, sellObject} = require('../db/utility.js');
 const levelUser = require('../db/levelling.js');
-const bestemmia = require('../UnCommands/bestemmia.js')
-const {getRandomPokemon, getPokemonEmoji, calculateDamage, calculateInitialStats, getPokemonDescription} = require('../Creatures/pokemon.js')
-const {discoverTreasure, getObjectInfo} = require('../Commands/guildfantasyobject.js')
-
 const {greetings, underDev} = require('./Responses.js');
 const strike = require('../UnCommands/strike.js');
 
@@ -25,6 +21,8 @@ module.exports = function(client) {
         levelUser(userId, guildId, msg.member);
         addXpToUser(guildId, userId, xpPerMsg);
     }
+
+    /**Random check to add some emojis in a particular channel for a particular guild */
 
     if (msg.channel.id === channelID && msg.content.includes("https://")) {
         const emojis = ["🎶", "🎵", "🎤"];
@@ -48,16 +46,21 @@ module.exports = function(client) {
 
     if(caseInsensitiveContent.includes("corvado search")){
         underDevelopement(msg);
+        // To implement search engine ? 
     }
 
     if((caseInsensitiveContent.includes("corvado can you")) || (caseInsensitiveContent.includes("corvado could you")) || (caseInsensitiveContent.includes("corvado would you"))){
         underDevelopement(msg);
+        // to implement 
     }
 
     if(caseInsensitiveContent.includes("corvado what is") || caseInsensitiveContent.includes("corvado what kind") || caseInsensitiveContent.includes("corvado what should")){
         underDevelopement(msg);
+        // to implememnt search engine 
     }
 
+
+    /** Random switchc  */
 
     switch (caseInsensitiveContent) {
         case 'patty':
@@ -95,6 +98,7 @@ module.exports = function(client) {
             break;
     }
 
+    /** Check to gather emoji id  */
     const emojiName = '069';
     const emoji = msg.guild.emojis.cache.find(emoji => emoji.name === emojiName);
     if (emoji) {

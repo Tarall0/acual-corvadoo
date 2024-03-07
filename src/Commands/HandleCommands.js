@@ -1,7 +1,7 @@
 const {canSpin, spinWheel} = require('./SpeenWheel.js');
 const {addXpToUser, getUserInfo, emptyUserInventory} = require('../db/utility.js');
 const nodeHtmlToImage = require('node-html-to-image')
-const {getPokemonDescription} = require('../Creatures/pokemon.js');
+const {getPokemonDescription} = require('../Entities/pokemon.js');
 
 const {EmbedBuilder} = require('discord.js');
 const getCryptoInfo = require('./CryptoInfo.js');

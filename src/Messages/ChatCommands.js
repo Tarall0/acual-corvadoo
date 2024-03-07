@@ -2,9 +2,9 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const {roles, shiftroles} = require('../Commands/assign-roles.js');
 const {addXpToUser, setPokemon, setObject, addGuildCoin, getUserInfo, addFightWin, sellObject} = require('../db/utility.js');
 const bestemmia = require('../UnCommands/bestemmia.js')
-const {getRandomPokemon, getPokemonEmoji, calculateDamage, calculateInitialStats, getPokemonDescription} = require('../Creatures/pokemon.js')
-const {getRandomMerchant} = require('../Creatures/merchants.js')
-const {discoverTreasure, getObjectInfo} = require('../Commands/guildfantasyobject.js')
+const {getRandomPokemon, getPokemonEmoji, calculateDamage, calculateInitialStats, getPokemonDescription} = require('../Entities/pokemon.js')
+const {getRandomMerchant} = require('../Entities/merchants.js')
+const {discoverTreasure, getObjectInfo} = require('../Entities/guildfantasyobject.js')
 
 module.exports = function(client) {
     client.on('messageCreate', async (msg) => {
