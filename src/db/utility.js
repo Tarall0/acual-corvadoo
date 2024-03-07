@@ -124,27 +124,35 @@ setObject: async function setObject(guildId, userId, object){
     });
 },
 
-sellObject: async function sellObject(guildId, userId, obj, gold){
-
+sellObject: async function sellObject(guildId, userId, position, gold) {
     try {
         await mdbclient.connect();
         const database = mdbclient.db(process.env.DB_NAME);
         const usersCollection = database.collection('users');
         
+        // get the user's objects array
+        const user = await usersCollection.findOne({ userId: userId, guild: guildId });
+        const objects = user.objects;
+
+        // Extract the object to sell based on the position
+        const objectToSell = objects[position - 1];
+
+        // Remove the object from the objects array
+        objects.splice(position - 1, 1);
+
+        // Update the user's document in the database
         await usersCollection.updateOne(
-           { userId: userId, guild: guildId },
-           { 
-            $pull: { objects: obj }, // Remove the object from the objects array
-            $inc: { gold: gold } // Increment the gold field with the new gold amount
+            { userId: userId, guild: guildId },
+            { 
+                $set: { objects: objects }, // Update the objects array
+                $inc: { gold: gold } 
             }
-           
         );
 
-        console.log(`Object "${obj}" sold by user ${userId} in guild ${guildId}.`);
+        console.log(`Object "${objectToSell}" sold by user ${userId} in guild ${guildId}.`);
     } catch (error) {
         console.error('Error selling object:', error);
     }
-
 },
 
 emptyUserInventory: async function emptyUserInventory(guildId, userId) {

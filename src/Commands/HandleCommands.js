@@ -1,7 +1,7 @@
 const {canSpin, spinWheel} = require('./SpeenWheel.js');
 const {addXpToUser, getUserInfo, emptyUserInventory} = require('../db/utility.js');
 const nodeHtmlToImage = require('node-html-to-image')
-const {getPokemonDescription} = require('./pokemon.js');
+const {getPokemonDescription} = require('../Creatures/pokemon.js');
 
 const {EmbedBuilder} = require('discord.js');
 const getCryptoInfo = require('./CryptoInfo.js');
@@ -110,6 +110,7 @@ module.exports = function(client){
                             position: absolute;
                             top: 10px;
                             right: 10px;
+                            font-size: 13px;
 
                         }
 
@@ -312,8 +313,13 @@ module.exports = function(client){
                             position: absolute;
                             top: 8px;
                             right: 15px;
-                            font-size: 16px;
+                            font-size: 14px;
                             border-bottom: 2px solid rgb(153, 51, 255);
+                            display: flex;
+                        }
+
+                        .fights-number{
+                            font-size: 10px;
                         }
 
                     </style>
@@ -352,7 +358,7 @@ module.exports = function(client){
                                     ${admin}
                                 </div>
                                 <div class="fights">
-                                    ⚔️ ${userInfo.f_wins}
+                                  <span class="fights_number"> ${userInfo.f_wins}</span><span>  ⚔️ </span> 
                                 </div>
                             </div>
 
@@ -419,14 +425,19 @@ module.exports = function(client){
             case 'cryptoinfo':
                 const cryptoName = i.options.getString('cryptoname');
                 try {
-                    const info = await getCryptoInfo(cryptoName);
+                    const {name, symbol, price, priceChange, priceChangePerc, lastChange, cryptopic} = await getCryptoInfo(cryptoName);
             
-                    if (info) {
-                        const img = getCryptoImg(cryptoName);
+                    if (name) {
                         i.reply(`Here the current information about **${cryptoName}**`)
                         .then(
                             setTimeout(() => {
-                                i.channel.send(info);
+                                const embedCrypto = new EmbedBuilder()
+                                    .setTitle(`${name} (${symbol})`)
+                                    .setDescription(`**Current Price**: ${price}$ \n**Last 24h Change**: ${priceChange}$ (${priceChangePerc}%)\n**Updated**: ${lastChange}`)
+                                    .setThumbnail(cryptopic)
+                                    .setColor('#0099ff');
+
+                                i.channel.send({embeds: [embedCrypto]});
                             }, 1000)
                         );
                         
@@ -551,7 +562,7 @@ module.exports = function(client){
                 break;
             }
                         
-            case 'about':
+            case 'corvado':
                 const about = new EmbedBuilder()
                 .setTitle("About Corvado BOT")
                 .setURL('https://tarallo.dev/')
@@ -563,7 +574,7 @@ module.exports = function(client){
                 .addFields(
                     {
                         name: "Commands Available",
-                        value: "\nUse **/corvado** for the list of commands available\n\n"
+                        value: "\nUse **/commands_corvado** for the list of commands available\n\n"
                     
                     },
                 )
@@ -572,7 +583,7 @@ module.exports = function(client){
                 i.reply({embeds: [about]});
                 break;
 
-            case 'corvado':
+            case 'commands_corvado':
                 const commands = new EmbedBuilder()
                     .setTitle("Commands Corvado")
                     .setDescription("Here is the list of commands Corvado currently support")

@@ -1,34 +1,5 @@
-
 const axios = require('axios');
-
-exports.modules = async function getCryptoInfo(cryptoName) {
-    try {
-        const apiUrl = `https://api.coingecko.com/api/v3/coins/${cryptoName}`;
-        const response = await axios.get(apiUrl);
-        const data = response.data;
-
-        const name = data.name;
-        const symbol = data.symbol;
-        const price = data.market_data.current_price.usd;
-        const priceChange = data.market_data.price_change_24h;
-        const priceChangePerc = data.market_data.price_change_percentage_24h;
-        const lastChange = data.market_data.last_updated;
-        const cryptopic = getCryptoImg(cryptoName);
-
-        const embed = new MessageEmbed()
-            .setTitle(`${name} (${symbol})`)
-            .addField('Price (USD)', price, true)
-            .addField('Last 24h Change', `${priceChange} (${priceChangePerc}%)`, true)
-            .addField('Updated', lastChange, true)
-            .setColor('#0099ff');
-        
-        return embed;
-        
-    } catch (error) {
-        console.error('Failed to retrieve cryptocurrency information:', error);
-        return 'Failed to retrieve cryptocurrency information';
-    }
-}
+const { EmbedBuilder } = require('discord.js');
 
 async function getCryptoImg(cryptoName) {
     try {
@@ -45,4 +16,28 @@ async function getCryptoImg(cryptoName) {
     }
 }
 
+async function getCryptoInfo(cryptoName) {
+    try {
+        const apiUrl = `https://api.coingecko.com/api/v3/coins/${cryptoName}`;
+        const response = await axios.get(apiUrl);
+        const data = response.data;
 
+        const name = data.name;
+        const symbol = data.symbol;
+        const price = data.market_data.current_price.usd;
+        const priceChange = data.market_data.price_change_24h;
+        const priceChangePerc = data.market_data.price_change_percentage_24h;
+        const lastChangeTimestamp = data.market_data.last_updated;
+        // Convert timestamp to a more user-friendly format
+        const lastChange = new Date(lastChangeTimestamp).toLocaleString();
+        const cryptopic = await getCryptoImg(cryptoName);
+        
+        return {name, symbol, price, priceChange, priceChangePerc, lastChange, cryptopic};
+        
+    } catch (error) {
+        console.error('Failed to retrieve cryptocurrency information:', error);
+        return 'Failed to retrieve cryptocurrency information';
+    }
+}
+
+module.exports = getCryptoInfo;

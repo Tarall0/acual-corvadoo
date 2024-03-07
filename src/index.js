@@ -1,5 +1,6 @@
 const {Client, IntentsBitField, Partials, GatewayIntentBits} = require('discord.js');
-const handleGenericMessage = require('./Messages/GenericMessage.js');
+const handleMessages = require('./Messages/HandleMessages.js');
+const chatCommands = require('./Messages/ChatCommands.js')
 const moderation = require('./Moderation/Moderation.js');
 const handleCommannds = require('./Commands/HandleCommands.js');
 const emojiReaction = require('./EmojiReaction.js')
@@ -37,7 +38,8 @@ client.once('ready', () => {
     run(client).catch(console.dir);
     console.log(`${client.user.username} is now running ✅`);
     emojiReaction(client);
-    handleGenericMessage(client);
+    handleMessages(client);
+    chatCommands(client);
     moderation(client);
     handleCommannds(client);
 });

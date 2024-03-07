@@ -7,24 +7,6 @@ const commands = [
         description: 'Test command',
     },
     {
-        name: 'add',
-        description: 'Add two numbers',
-        options: [
-            {
-                name: 'number1', 
-                description: 'Add the first number',
-                type: ApplicationCommandOptionType.Number,
-                required: true,
-            },
-            {
-                name: 'number2', 
-                description: 'Add the second number',
-                type: ApplicationCommandOptionType.Number,
-                required: true,
-            }
-        ]
-    },
-    {
 
         name: 'insult',
         description: 'Generate a random insult for the user you want',
@@ -154,52 +136,12 @@ const commands = [
         ]
     },
     {
-        name: "about",
-        description: "About Corvado Bot"
-    },
-    {
         name: "corvado",
-        description: "Commands supported by Corvado Bot"
+        description: "Get info about Corvado Bot"
     },
     {
-        name: 'review',
-        description: 'Send feedback for Corvado Bot',
-        options: [
-            {
-                name: 'stars',
-                description: 'Add a star value from 1 to 5',
-                type: ApplicationCommandOptionType.Number,
-                choices: [
-                    {
-                        name: "⭐",
-                        value: 1,
-                    },
-                    {
-                        name: "⭐ ⭐",
-                        value: 2,
-                    },
-                    {
-                        name: "⭐ ⭐ ⭐",
-                        value: 3,
-                    },
-                    {
-                        name: "⭐ ⭐ ⭐ ⭐",
-                        value: 4,
-                    },
-                    {
-                        name: "⭐ ⭐ ⭐ ⭐ ⭐",
-                        value: 5,
-                    },
-                ],
-                required: true,
-            },
-            {
-                name: 'feedback',
-                description: 'Tell us what you think about Corvado Bot',
-                type: ApplicationCommandOptionType.String,
-                required: true,
-            }
-        ]
+        name: "commands_corvado",
+        description: "Commands supported by Corvado Bot"
     }
 ]
 
