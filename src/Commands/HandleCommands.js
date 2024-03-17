@@ -161,7 +161,8 @@ module.exports = function(client){
                         dpi: 600,
                         type: 'png',
                         puppeteerArgs: {
-                        args: ['--no-sandbox', '--disable-gpu'], 
+                            executablePath: '/usr/bin/chromium-browser',
+                            args: ['--no-sandbox', '--disable-gpu'], 
                         },
                         encoding: 'buffer',
                     })
@@ -375,7 +376,8 @@ module.exports = function(client){
                         height: 100,
                         type: 'png',
                         puppeteerArgs: {
-                        args: ['--no-sandbox', '--disable-gpu'],
+                            executablePath: '/usr/bin/chromium-browser',
+                            args: ['--no-sandbox', '--disable-gpu'],
                         },
                         encoding: 'buffer',
                     })
