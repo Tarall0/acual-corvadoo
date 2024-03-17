@@ -375,7 +375,7 @@ module.exports = function(client){
                         height: 100,
                         type: 'png',
                         puppeteerArgs: {
-                        args: ['--no-sandbox'],
+                        args: ['--no-sandbox', '--disable-gpu'],
                         },
                         encoding: 'buffer',
                     })
