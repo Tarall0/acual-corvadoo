@@ -165,6 +165,7 @@ module.exports = function(client){
                         puppeteer: puppeteerCore,
                         puppeteerArgs: {
                             args: ['--no-sandbox', '--disable-gpu'], 
+                            executablePath: await chrome.executablePath,
                         },
                         encoding: 'buffer',
                     })
@@ -380,6 +381,7 @@ module.exports = function(client){
                         puppeteer: puppeteerCore,
                         puppeteerArgs: {
                             args: ['--no-sandbox', '--disable-gpu'],
+                            executablePath: await chrome.executablePath,
                         },
                         encoding: 'buffer',
                     })
