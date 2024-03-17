@@ -163,7 +163,7 @@ module.exports = function(client){
                         type: 'png',
                         puppeteerArgs: {
                             args: ['--no-sandbox', '--disable-gpu'], 
-                            executablePath: '/usr/bin/chromium-browser',
+                            executablePath: '/usr/bin/firefox',
                         },
                         encoding: 'buffer',
                     })
@@ -378,7 +378,7 @@ module.exports = function(client){
                         type: 'png',
                         puppeteerArgs: {
                             args: ['--no-sandbox', '--disable-gpu'],
-                            executablePath: '/usr/bin/chromium-browser',
+                            executablePath: '/usr/bin/firefox',
                         },
                         encoding: 'buffer',
                     })
