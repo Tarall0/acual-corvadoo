@@ -1,9 +1,8 @@
 const {canSpin, spinWheel} = require('./SpeenWheel.js');
 const {addXpToUser, getUserInfo, emptyUserInventory} = require('../db/utility.js');
 const nodeHtmlToImage = require('node-html-to-image');
-const chrome = require('chrome-aws-lambda');
 const {getPokemonDescription} = require('../Entities/pokemon.js');
-const puppeteerCore = require('puppeteer-core');
+//const puppeteerCore = require('puppeteer-core');
 
 const {EmbedBuilder} = require('discord.js');
 const getCryptoInfo = require('./CryptoInfo.js');
@@ -162,7 +161,6 @@ module.exports = function(client){
                         quality: 100,
                         dpi: 600,
                         type: 'png',
-                        puppeteer: puppeteerCore,
                         puppeteerArgs: {
                             args: ['--no-sandbox', '--disable-gpu'], 
                             executablePath: '/usr/bin/chromium-browser',
@@ -378,7 +376,6 @@ module.exports = function(client){
                         width: 100,
                         height: 100,
                         type: 'png',
-                        puppeteer: puppeteerCore,
                         puppeteerArgs: {
                             args: ['--no-sandbox', '--disable-gpu'],
                             executablePath: '/usr/bin/chromium-browser',
