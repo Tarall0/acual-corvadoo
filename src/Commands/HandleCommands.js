@@ -161,7 +161,7 @@ module.exports = function(client){
                         dpi: 600,
                         type: 'png',
                         puppeteerArgs: {
-                        args: ['--no-sandbox'],
+                        args: ['--no-sandbox', '--disable-gpu'], 
                         },
                         encoding: 'buffer',
                     })
