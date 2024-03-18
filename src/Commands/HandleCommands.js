@@ -162,11 +162,12 @@ module.exports = function(client){
                         dpi: 600,
                         type: 'png',
                         puppeteerArgs: {
+                            headless: true,
                             args: ['--no-sandbox', '--disable-gpu'], 
                             executablePath: '/usr/bin/firefox',
                         },
                         encoding: 'buffer',
-                    })
+                    });
                    
                     
                     i.channel.send({ files: [inventoryImg] }).then(
@@ -377,6 +378,7 @@ module.exports = function(client){
                         height: 100,
                         type: 'png',
                         puppeteerArgs: {
+                            headless: true,
                             args: ['--no-sandbox', '--disable-gpu'],
                             executablePath: '/usr/bin/firefox',
                         },
