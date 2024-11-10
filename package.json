@@ -16,7 +16,7 @@
   "author": "Tarallo",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.6.7",
+    "axios": "^1.7.4",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.4",
     "express": "^4.21.1",
